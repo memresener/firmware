@@ -35,11 +35,11 @@ class Scanner
 
 private:
 	// DAC controller
-	PiezoDACController controller;
+	PiezoDACController* controller;
 	// Sampler
-	SignalSampler sampler;
+	SignalSampler* sampler;
 	// RTx (com)
-	RTx phone;
+	RTx* phone;
 
 	// number of lines scanned during the
 	// scanning process.
@@ -65,7 +65,9 @@ protected:
 
 public:
 	// Constructor
-	Scanner(const PiezoDACController&, const SignalSampler&, const RTx&, const int lineLength);
+	//Scanner(const PiezoDACController*, const SignalSampler&, const RTx&, const int lineLength);
+	Scanner(PiezoDACController *controller, SignalSampler *sampler, const RTx *phone, const int lineLength);
+
 	// destructor
 	~Scanner();
 	// resets all parameters. Should call controller.reset(), sampler.reset() and rtx.reset()

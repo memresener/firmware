@@ -138,9 +138,6 @@ public:
 	// set the current position as the origin
 	void SetAsOrigin();
 
-	// return current voltage for selected channel (A - x, B - y, C - z).
-	int getVoltage(int);
-
 	// invert channel A(X) & B(Y)
 	void invert();
 
@@ -150,6 +147,11 @@ public:
 	int getCurrentX() { return currentX; }
 	int getCurrentY() { return currentY; }
 	int getCurrentZ() { return currentZ; }
+
+	int getCurrentXPlus() { return currentXPlus; }
+	int getCurrentYPlus() { return currentYPlus; }
+	int getCurrentXMinus() { return currentXMinus; }
+	int getCurrentYMinus() { return currentYMinus; }
 };
 
 #endif

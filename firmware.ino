@@ -105,7 +105,7 @@ DAC_AD5696* pz_dac = new DAC_AD5696();   // Piezo DAC
 //DAC_AD5696* vcdac = new DAC_AD5696();
 PiezoDACController* ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
 SignalSampler* sampler = new SignalSampler(diff_adc, SAMPLE_SIZE);
-Scanner* scanner = new Scanner(*ctrl, *sampler, *phone, LINE_LENGTH);
+Scanner* scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
 
 //This function runs once, when the arduino starts
 void setup() {
@@ -180,7 +180,7 @@ void loop()
 
 		ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
 		sampler = new SignalSampler(sig_adc, CUSTOM_SAMPLE_SIZE);
-		scanner = new Scanner(*ctrl, *sampler, *phone, CUSTOM_LINE_LENGTH);
+		scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
 
 		// initialise the controller
 		ctrl->Init();

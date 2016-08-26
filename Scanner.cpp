@@ -8,7 +8,10 @@
 #include "RTx.h"
 
 // Constructor
-Scanner::Scanner(const PiezoDACController &controller, const SignalSampler &sampler, const RTx &phone, const int lineLength) : pixels(new int[lineLength * 2]), controller(controller), sampler(sampler), phone(phone) {
+Scanner::Scanner(PiezoDACController *controller, SignalSampler *sampler, const RTx *phone, const int lineLength)
+{
+	this->pixels = new int[lineLength * 2];
+	this->controller = controller;
 	this->startTime = 0;
 	this->endTime = 0;
 	this->scanning = false;
@@ -27,8 +30,8 @@ void Scanner::reset()
 	// TODO implement proper interruption of process.
 	delay(5000);
 
-	controller.reset();
-	sampler.reset();
+	controller->reset();
+	sampler->reset();
 	startTime = 0;
 	endTime = 0;
 	linesScanned = 0;
@@ -40,19 +43,19 @@ int Scanner::scanLine() {
 	unsigned int x = 0;
 
 	//trace
-	for (int i = 0; i < controller.getLineSize(); i++) {
-		pixels[x] = sampler.detectPixel();
+	for (int i = 0; i < controller->getLineSize(); i++) {
+		pixels[x] = sampler->detectPixel();
 		x++;
-		if (i + 1 < controller.getLineSize())
-			controller.increaseVoltage();
+		if (i + 1 < controller->getLineSize())
+			controller->increaseVoltage();
 	}
 
 	//retrace
-	for (int i = 0; i < controller.getLineSize(); i++) {
-		pixels[x] = sampler.detectPixel();
+	for (int i = 0; i < controller->getLineSize(); i++) {
+		pixels[x] = sampler->detectPixel();
 		x++;
-		if(i + 1 < controller.getLineSize())
-			controller.decreaseVoltage();
+		if(i + 1 < controller->getLineSize())
+			controller->decreaseVoltage();
 	}
 
 	linesScanned++;
@@ -62,6 +65,17 @@ int Scanner::scanLine() {
 
 // Start the scanning process.
 int Scanner::start() {
+
+#ifdef DEBUG
+	Serial.print(F("X_PLUS="));
+	Serial.println(controller->getCurrentXPlus());
+	Serial.print(F("X_MINUS="));
+	Serial.println(controller->getCurrentXMinus());
+	Serial.print(F("Y_PLUS="));
+	Serial.println(controller->getCurrentYPlus());
+	Serial.print(F("Y_MINUS="));
+	Serial.println(controller->getCurrentYMinus());
+#endif
 
 	// get start time
 	startTime = millis();
@@ -78,10 +92,10 @@ int Scanner::start() {
 		// scans one line (trace & re-trace)
 		scanLine();
 
-		scanning = phone.sendData(pixels, 2 * lineLength);
+		scanning = phone->sendData(pixels, 2 * lineLength);
 
 		// next line on y-axis
-		unsigned int cl = controller.nextLine();
+		unsigned int cl = controller->nextLine();
 
 		if (scanning == false) {
 			break;
@@ -91,16 +105,17 @@ int Scanner::start() {
 }
 
 int Scanner::stream() {
-  startTime = millis();
-  int data[1];
-  bool streaming = 1;
-  while (true){
-   data[0] = sampler.detectPixel(); 
-   streaming = phone.sendData(data, 1);
-   if (streaming == false)
-     break;
-  }
-  stop();
+	startTime = millis();
+	int data[1];
+	bool streaming = 1;
+	while (true) {
+		data[0] = sampler->detectPixel();
+		streaming = phone->sendData(data, 1);
+		if (streaming == false)
+			break;
+	}
+	stop();
+	return 0;
 }
 
 // stop the scanning process and resets the parameters.
@@ -133,5 +148,5 @@ void Scanner::setParam(String param, String value) {
 }
 
 void Scanner::invertChannels() {
-	controller.invert();
+	controller->invert();
 }
