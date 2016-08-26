@@ -16,6 +16,7 @@ Scanner::Scanner(PiezoDACController *controller, SignalSampler *sampler, const R
 	this->endTime = 0;
 	this->scanning = false;
 	this->lineLength = lineLength;
+	this->scanDelay = 0;
 }
 
 // Destructor
@@ -69,6 +70,8 @@ int Scanner::scanLine() {
 		{
 			controller->increaseVoltage();
 		}
+
+		if (scanDelay > 0) delayMicroseconds(scanDelay);
 	}
 
 	//retrace
@@ -87,8 +90,12 @@ int Scanner::scanLine() {
 		Serial.print(F("Stepping backwards "));
 		Serial.println(i);
 #endif
-		if(i + 1 < controller->getLineSize())
+		if (i + 1 < controller->getLineSize())
+		{
 			controller->decreaseVoltage();
+		}
+
+		if (scanDelay > 0) delayMicroseconds(scanDelay);
 	}
 
 	linesScanned++;

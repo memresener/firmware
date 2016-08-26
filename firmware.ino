@@ -297,6 +297,32 @@ void loop()
 		}
 		ctrl->setStepSize(idx);
 	}
+
+
+	// scan delay
+	else if (cmd == F("SCANDELAY?"))  // get the scan delay in micros
+	{
+		//Serial.print("LineLength is ");
+		Serial.println(ctrl->getStepSize());
+	}
+	else if (CheckSingleParameter(cmd, F("SCANDELAY"), idx, boolean, F("SCANDELAY - Invalid command syntax!")))  // set scan delay in micros
+	{
+		if (idx >= 0)
+		{
+			scanner->setScanDelay(idx);
+			if (reply)
+			{
+				Serial.print(F("SCANDELAY="));
+				Serial.println(scanner->getScanDelay());
+			}
+		}
+		else {
+			if (reply)
+			{
+				Serial.println(F("SCANDELAY cannot be negative."));
+			}
+		}
+	}
 #endif
 
 #define SaS_

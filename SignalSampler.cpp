@@ -39,6 +39,10 @@ int SignalSampler::init(int sampleSize) {
 
 int SignalSampler::readChannels()
 {
+
+	// for the moment, use single sample as somewhere sampleSize is being set to 0...
+	//sampleSize = 1;
+
 #ifdef DEBUG
 	Serial.println(F("SignalSampler::detectPixel"));
 	Serial.println(sizeof(float) * 7);
@@ -63,24 +67,25 @@ int SignalSampler::readChannels()
 
 #ifdef DEBUG
 	Serial.print(F("sampleSize="));
-	Serial.println(this->sampleSize);
+	Serial.println(getSampleSize());
 #endif
 
-	for (int i = 0; i < this->sampleSize; i++){
+	//for (int i = 0; i < this->sampleSize; i++){
 
 #ifdef DEBUG
-		Serial.print(F("Reading ADC"));
-		Serial.print(i);
+		//Serial.print(F("Reading ADC"));
+		//Serial.println(i);
 #endif
 		// get signals
 		sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
 		sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
-		sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
-		sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
-		sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
-		sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
-		sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
-//   
+		//sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
+		//sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
+		//sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
+		//sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
+		//sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
+
+
 //#ifdef DEBUG
 //		Serial.println(sampleMeans[0]);
 //		Serial.println(sampleMeans[1]);
@@ -99,17 +104,17 @@ int SignalSampler::readChannels()
 		//	j--;
 		//}
 		//sumSignalValue[j+1] = temp;
-	}
+	//}
 
 #ifdef DEBUG
 	Serial.println(F("Calculating means"));
 #endif
 
-	// calculate means
-	for (int i = 0; i < 7; i++)
-	{
-		sampleMeans[i] = sampleMeans[i] / sampleSize;
-	}
+	//// calculate means
+	//for (int i = 0; i < 7; i++)
+	//{
+	//	sampleMeans[i] = sampleMeans[i] / sampleSize;
+	//}
 
 #ifdef DEBUG
 	Serial.println(sampleMeans[0]);
