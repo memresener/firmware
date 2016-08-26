@@ -135,6 +135,9 @@ public:
 	// reset to x & y coordinates to 0,0
 	unsigned int reset();
 
+	// set the current position as the origin
+	void SetAsOrigin();
+
 	// return current voltage for selected channel (A - x, B - y, C - z).
 	int getVoltage(int);
 

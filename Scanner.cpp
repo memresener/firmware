@@ -71,7 +71,7 @@ int Scanner::start() {
 	for (int i = 0; i < lineLength; i++) {
 
 #ifdef DEBUG
-		Serial.print("Line ");
+		Serial.print(F("Line "));
 		Serial.println(i);
 #endif
 

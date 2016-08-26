@@ -25,6 +25,16 @@
 
 bool reply = false;
 
+// commands
+const String InvalidCommandString = " - Invalid command syntax!";
+const String SXP = "SXP";   // set startingXPosition
+const String SYP = "SYP";   // set startingXPosition
+const String SZP = "SZP";   // set startingXPosition
+const String SXPq = "SXP?";   // startingXPosition
+const String SYPq = "SYP?";   // startingXPosition
+const String SZPq = "SZP?";   // startingXPosition
+const String LL = "LL";		// line length
+const String LLq = "LLq";
 
 /*!
 	Check <commandLine> for something of the form "<name> <number>"
@@ -123,13 +133,10 @@ extern String const PARAM_LINE_LENGTH;
 //This function keeps looping
 void loop()
 {
-	//delay(500);
+	//delay(20);
 	//////pz_dac->SetOutput(15, 0xFFFF);
 	//ctrl->SetDACOutput(15, 0x0000);
-	//delay(500);
-	//ctrl->SetDACOutput(15, (uint16_t)44308);
-	//delay(500);
-	//////pz_dac->SetOutput(15, 0x7FFF);
+	//delay(20);
 	//ctrl->SetDACOutput(15, 0xFFFF);
 
 	//return;
@@ -157,11 +164,11 @@ void loop()
 	  * VCDAC::SET <x> <y>
 	  *   Set the channel <x> voltage of the piezo DAC to <y>
 	  */
-	if (cmd == "GO")
+	if (cmd == F("GO"))
 	{
 		scanner->start();
 	}
-	else if (cmd == "SETUP")
+	else if (cmd == F("SETUP"))
 	{
 		delete ctrl;
 		delete sampler;
@@ -171,15 +178,18 @@ void loop()
 		int CUSTOM_LINE_LENGTH = Serial.parseInt();
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
 
-		ctrl = new PiezoDACController(vc_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
+		ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
 		sampler = new SignalSampler(sig_adc, CUSTOM_SAMPLE_SIZE);
 		scanner = new Scanner(*ctrl, *sampler, *phone, CUSTOM_LINE_LENGTH);
 
+		// initialise the controller
+		ctrl->Init();
+
 		if (reply)
 		{
-			Serial.print("Setup with STEP_SIZE= ");
+			Serial.print(F("Setup with STEP_SIZE= "));
 			Serial.print(CUSTOM_STEPSIZE);
-			Serial.print(", CUSTOM_LINE_LENGTH= ");
+			Serial.print(F(", CUSTOM_LINE_LENGTH= "));
 			Serial.print(CUSTOM_LINE_LENGTH);
 			Serial.print(" CUSTOM_SAMPLE_SIZE= ");
 			Serial.println(CUSTOM_SAMPLE_SIZE);
@@ -191,11 +201,11 @@ void loop()
 		scanner->stream();
 	}
 
-	else if (cmd == "SXP?")   // startXPlus (X starting point of scan)
+	else if (cmd == SXPq)   // startXPlus (X starting point of scan)
 	{
 		Serial.println(ctrl->startingXPlus);
 	}
-	else if (CheckSingleParameter(cmd, "SXP", idx, boolean, "SXP - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, SXP, idx, boolean, SXP + InvalidCommandString))
 	{
 		if (reply)
 		{
@@ -204,95 +214,138 @@ void loop()
 		}
 	}
 
-#define LL
-#ifdef LL
+#define CTRL_
+#ifdef CTRL_
+
+
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEX"), idx, boolean, F("CTRL::MOVEX y y=int")))  // move steps in the X direction
+	{
+		if (reply)
+		{
+			Serial.print(F("MOVEX="));
+			Serial.println(idx);
+		}
+		ctrl->move(X, idx, true);
+	}
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEY"), idx, boolean, F("CTRL::MOVEY y y=int")))  // move steps in the X direction
+	{
+		if (reply)
+		{
+			Serial.print(F("MOVEY="));
+			Serial.println(idx);
+		}
+		ctrl->move(Y, idx, true);
+	}
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEZ"), idx, boolean, F("CTRL::MOVEZ y y=int")))  // move steps in the X direction
+	{
+		if (reply)
+		{
+			Serial.print(F("MOVEZ="));
+			Serial.println(idx);
+		}
+		ctrl->move(Z, idx, true);
+	}
+	//else if (CheckSingleParameter(cmd, F("CTRL::MOVE"), idx, boolean, F("CTRL::MOVEx y - x=X,Y,Z y=int")))  // move steps in the _ direction
+	//{
+	//	PIEZO_AXIS axis = X;
+	//	if (reply)
+	//	{
+	//		// what channel
+	//		if (cmd[10] == 'X') axis = X;
+	//		if (cmd[10] == 'Y') axis = Y;
+	//		if (cmd[10] == 'Z') axis = Z;
+	//		Serial.print(F("MOVE"));
+	//		Serial.print(axis);
+	//		Serial.print(F("="));
+	//		Serial.println(idx);
+	//	}
+	//	ctrl->move(axis, idx, true);
+	//}
+
 	////////////////
 	//// LINE LENGTH
 	////////////////
-	else if (cmd == "LL?")
+	else if (cmd == LLq)
 	{
 		//Serial.print("LineLength is ");
 		Serial.println(ctrl->getLineSize());
 	}
-	else if (CheckSingleParameter(cmd, "LL", idx, boolean, "LL - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, LL, idx, boolean, LL + InvalidCommandString))
 	{
 		if (reply)
 		{
-			Serial.print("Setting line length to ");
+			Serial.print("LL=");
 			Serial.println(idx);
 		}
 		ctrl->setLineSize(idx);
 	}
-#endif
 
-#define StS
-#ifdef StS
 	//////////////
 	// STEP SIZE
 	//////////////
-	else if (cmd == "StS?")  // get step size
+	else if (cmd == F("STEPSIZE?"))  // get step size
 	{
 		//Serial.print("LineLength is ");
 		Serial.println(ctrl->getStepSize());
 	}
-	else if (CheckSingleParameter(cmd, "StS", idx, boolean, "StS - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, F("STEPSIZE"), idx, boolean, F("STEPSIZE - Invalid command syntax!")))
 	{
 		if (reply)
 		{
-			Serial.print("Setting step size to ");
+			Serial.print("StS=");
 			Serial.println(idx);
 		}
 		ctrl->setStepSize(idx);
 	}
 #endif
 
-#define SaS
-#ifdef SaS
+#define SaS_
+#ifdef SaS_
 	//////////////
 	// SAMPLE SIZE
 	//////////////
-	else if (cmd == "SaS?")   // get sample size
+	else if (cmd == F("SAMPLESIZE?"))   // get sample size
 	{
 		//Serial.print("LineLength is ");
 		Serial.println(sampler->getSampleSize());
 	}
-	else if (CheckSingleParameter(cmd, "SaS", idx, boolean, "SAMPLESIZE::SET - Invalid command syntax!"))   // set the sample size
+	else if (CheckSingleParameter(cmd, F("SAMPLESIZE"), idx, boolean, F("SAMPLESIZE - Invalid command syntax!")))   // set the sample size
 	{
 		if (reply)
 		{
-			Serial.print("Setting step size to ");
+			Serial.print("SaS=");
 			Serial.println(idx);
 		}
 		sampler->setSampleSize(idx);
 	}
 #endif
 
-	else if (cmd == "ERROR")
+	else if (cmd == F("ERROR"))
 	{
 
 	}
 
 
-	else if (cmd == "PING")
+	else if (cmd == F("PING"))
 	{
-		Serial.println("PONG");
+		Serial.println(F("PONG"));
 	}
-	else if (CheckSingleParameter(cmd, "REPLY", idx, boolean, "REPLY - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, F("REPLY"), idx, boolean, F("REPLY - Invalid syntax!")))   // reply?
 	{
 		reply = idx == 1;
 		if (reply)
 		{
-			Serial.print("Reply is ");
-			Serial.println(reply ? "on" : "off");
+			Serial.print("RPL=");
+			Serial.println(reply ? 1 : 0);
 		}
 	}
-	else if (CheckSingleParameter(cmd, "ECHO", idx, boolean, "ECHO - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, "ECHO", idx, boolean, "ECHO!"))  // echo back?
 	{
 		phone->echo = idx == 1;
 		if (reply)
 		{
-			Serial.print("Echo is ");
-			Serial.println(phone->echo ? "on" : "off");
+			Serial.print("ECHO=");
+			Serial.println(phone->echo ? 1 : 0);
 		}
 	}
 
@@ -336,7 +389,11 @@ void loop()
 #define DACCOMMANDS
 #ifdef DACCOMMANDS
 
-	else if (cmd.indexOf("GOTO") == 0)
+	else if (cmd == F("CTRL::INIT"))
+	{
+		ctrl->Init();
+	}
+	else if (cmd.indexOf(F("GOTO")) == 0)
 	{
 		int x = Serial.parseInt();
 		int y = Serial.parseInt();
@@ -346,25 +403,24 @@ void loop()
 
 		if (reply)
 		{
-			Serial.print("Moving to coordinates (");
+			Serial.print(F("Goint to ("));
 			Serial.print(x);
-			Serial.print(", ");
+			Serial.print(",");
 			Serial.print(y);
-			Serial.print(", ");
+			Serial.print(",");
 			Serial.print(z);
 			Serial.println(")");
 		}
 	}
-	else if (CheckSingleParameter(cmd, "POS?", idx, boolean, "POS? - Invalid command syntax!"))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, "POS?", idx, boolean, "POS?!"))  // set the internal reference state
 	{
-		Serial.print("asdasd");
 		Serial.println(idx);
 		if (idx >= 1 && idx <= 3 && boolean)
 		{
 			if (reply)
 			{
-				Serial.print("Position of axis ");
 				Serial.print(idx);
+				Serial.print("=");
 			}
 
 			int pos = ctrl->GetPosition((PIEZO_AXIS)(idx - 1));
@@ -372,9 +428,8 @@ void loop()
 
 			if (reply)
 			{
-				Serial.print("Position of axis ");
 				Serial.print(idx);
-				Serial.print(" is ");
+				Serial.print("=");
 				Serial.println(pos);
 			}
 		}
@@ -382,7 +437,7 @@ void loop()
 
 
 
-	else if (cmd == "VCDAC::PRINT")
+	else if (cmd == "DAC::PRINT")  /// print dac details
 	{
 		Serial.print("Max value (u) = ");
 		Serial.println(vc_dac->getMaxValueU());
@@ -396,12 +451,12 @@ void loop()
 		vc_dac->Reset(AD569X_RST_MIDSCALE);
 		if (reply) Serial.println("Resetting Piezo DAC");
 	}
-	else if (CheckSingleParameter(cmd, "VCDAC::RFST", idx, boolean, "VCDAC::RFST - Invalid command syntax!"))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, "VCDAC::RFST", idx, boolean, "VCDAC::RFST!"))  // set the internal reference state
 	{
 		if (reply)
 		{
-			Serial.print("Turning internal reference ");
-			Serial.println(idx == 1 ? "on" : "off");
+			Serial.print("IntRef=");
+			Serial.println(idx);
 		}
 		vc_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
 	}
