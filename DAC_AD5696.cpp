@@ -282,7 +282,7 @@ unsigned short DAC_AD5696::ReadBack(unsigned char dacChannelAddr)
  *
  * @return The actual value of the output voltage.
 *******************************************************************************/
-float DAC_AD5696::SetVoltage(unsigned char channel, 
+int DAC_AD5696::SetVoltage(unsigned char channel, 
                         float outputVoltage, 
                         float vRef)
 {
@@ -315,10 +315,10 @@ float DAC_AD5696::SetVoltage(unsigned char channel,
 	uint8_t lsb = value;
 	uint8_t msb = value >> 8;
 
-	/*Serial.println(msb);
-	Serial.println(lsb);
-	Serial.println(AD569X_5MSB_SLAVE_ADDR | addressPinA1 | addressPinA0);
-	Serial.println(B00110000 | channel);*/
+	//Serial.println(msb);
+	//Serial.println(lsb);
+	//Serial.println(AD569X_5MSB_SLAVE_ADDR | addressPinA1 | addressPinA0);
+	//Serial.println(B00110000 | channel);
 
 	Wire.beginTransmission(AD569X_5MSB_SLAVE_ADDR | addressPinA1 | addressPinA0);
 	Wire.write(B00110000 | channel);  // set and update DAC channels;
@@ -351,8 +351,8 @@ int DAC_AD5696::SetOutput(uint8_t channel,
 
 	Wire.beginTransmission(AD569X_5MSB_SLAVE_ADDR | addressPinA1 | addressPinA0);
 	Wire.write(B00110000 | channel);  // set and update DAC channels;
-	Wire.write(lsb);  // set to half voltage
-	Wire.write(msb);
+	Wire.write(msb);  // set to half voltage
+	Wire.write(lsb);
 	Wire.endTransmission();
 
 	return 0;

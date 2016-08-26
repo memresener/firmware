@@ -118,12 +118,6 @@
 #define AD569X_PWR_PDA(x)      (((x) & 0x3) << 0)
 
 
-/* AD569X_PWR_PDn(x) options(n = A, B, C, D) */
-#define AD569X_PD_NORMAL       0 // Normal operation
-#define AD569X_PD_1K           1 // 1 kOhm to GND
-#define AD569X_PD_100K         2 // 100 kOhm to GND
-#define AD569X_PD_3STATE       3 // Three-state
-
 /* LDAC Mask Register definition */
 #define AD569X_MSK_CH_A        1
 #define AD569X_MSK_CH_B        2
@@ -137,8 +131,6 @@
 /* Clear code options */
 #define AD569X_RST_ZERO_SCALE     0
 #define AD569X_RST_MIDSCALE       1
-
-#define AD569X_DAC_MAX 65535
 
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
@@ -172,7 +164,7 @@ public:
 	unsigned short ReadBack(unsigned char dacChannelAddr);
 
 	/*! Selects the output voltage of the selected channel. */
-	float SetVoltage(unsigned char channel,
+	int SetVoltage(unsigned char channel,
 		float outputVoltage,
 		float vRef);
 

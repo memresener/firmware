@@ -22,14 +22,11 @@
 #define DAC_TLC_5620_CONTROLLER "0.0.1"
 
 // enumeration of directions that the stage can move in
-enum PIEZO_DIRECTION
+enum PIEZO_AXIS
 {
-	X_UP,
-	X_DOWN,
-	Y_UP,
-	Y_DOWN,
-	Z_UP,
-	Z_DOWN
+	X,
+	Y,
+	Z
 };
 
 // what dac channels correspond to each direction
@@ -54,8 +51,6 @@ private:
 	int stepSize;
 	// size of the scan region in pixels (width and height)
 	int lineSize;
-	// amplification
-	bool useRNG;
 
 	// the current pixel position in the image.
 	// each pixel has a unique x,yi position.
@@ -80,23 +75,20 @@ private:
 	// scan 90-degree angle
 	bool invertChannels;
 
+public:
+
 	/*!
 		move the stage in the direction given.  Move \a times amount of steps.
 		allAtOnce says whether to move step by step, \a times times, or just do all steps in one go (large voltage change)
 	*/
-	int move(PIEZO_DIRECTION direction, unsigned int times, bool allAtOnce);
+	int move(PIEZO_AXIS direction,  int times, bool allAtOnce);
 
-	/*!
-		Go to some coordinates
-	*/
-	int PiezoDACController::GotoCoordinates(uint16_t x, uint16_t y);
 
 	/*!
 		Set DAC output.  Includes scaling etc.
 	*/
 	int SetDACOutput(uint8_t channels, uint16_t value);
-
-public:
+	//int SetDACOutput(uint8_t channels, double value, double vRef);
 
 	// the starting DAC output values (values from 0 to 65535)
 	uint16_t startingXPlus;
@@ -104,9 +96,17 @@ public:
 	uint16_t startingYPlus;
 	uint16_t startingYMinus;
 
+	/*!
+	Go to some coordinates
+	*/
+	int GotoCoordinates(int x, int y, int z);
+
+
+	// get position
+	int GetPosition(PIEZO_AXIS axis);
 
 	// constructor
-	PiezoDACController(ADDAC *dac, int, int, int, bool);
+	PiezoDACController(ADDAC *dac, int, int, int);
 	
 	// destructor
 	~PiezoDACController();
@@ -114,7 +114,7 @@ public:
 	void Init();
 
 	// reset parameters
-	unsigned int reset(int, int, int, bool);
+	unsigned int reset(int, int, int);
 
 	// increase voltage by one step (8 bit steps given by chip)
 	unsigned int increaseVoltage();

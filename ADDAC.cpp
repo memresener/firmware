@@ -2,6 +2,7 @@
 // 
 // 
 
+#include "DACINFO.h"
 #include "ADDAC.h"
 
 #define ON HIGH
@@ -54,7 +55,7 @@ unsigned char ADDAC::Setup(uint8_t ldacPin)
 		digitalWrite(ldacPin, 0);
 		_setup = true;
 
-		Serial.println("Setup");
+		//Serial.println("Setup");
 	}
 	return i2cstatus;
 }

@@ -60,6 +60,9 @@ public:
 
 	virtual int SetOutput(uint8_t channel,
 		uint16_t value) = 0;
+	virtual int SetVoltage(unsigned char channel,
+		float outputVoltage,
+		float vRef) = 0;
 };
 
 #endif
