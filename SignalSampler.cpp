@@ -11,31 +11,28 @@ SignalSampler::SignalSampler(void) {
 SignalSampler::SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff_adc, int sampleSize)
 {
 #ifdef DEBUG
-	Serial.println(F("SignalSampler"));
+	Serial.println(F("SignalSampler::SignalSampler"));
 #endif
 	this->sampleSize = sampleSize;
 	this->sig_adc = sig_adc;
 	this->diff_adc = diff_adc;
-	this->init(sampleSize);
+
+	// start the adcs  DONE OUTSIDE!
+	//sig_adc->begin();
+	//diff_adc->begin();
+
+	//this->buffer = new int[sampleSize];
+	this->sampleMeans = new float[7];  // to store means of each channel
 	//this scales the input by the reference pin of the arduino
 	//Serial.println("SignalSampler(args);");
+
+#ifdef DEBUG
+	Serial.print(F("SignalSampler::SignalSampler sampleSize="));
+	Serial.println(this->sampleSize);
+#endif
 }
 
 SignalSampler::~SignalSampler() {}
-
-int SignalSampler::init(int sampleSize) {
-
-	sig_adc->begin();
-	diff_adc->begin();
-	this->sampleSize = sampleSize;
-
-#ifdef DEBUG
-	Serial.print(F("sampleSize="));
-	Serial.println(this->sampleSize);
-#endif
-	//this->buffer = new int[sampleSize];
-	this->sampleMeans = new float[7];  // to store means of each channel
-}
 
 int SignalSampler::readChannels()
 {
@@ -44,7 +41,7 @@ int SignalSampler::readChannels()
 	//sampleSize = 1;
 
 #ifdef DEBUG
-	Serial.println(F("SignalSampler::detectPixel"));
+	Serial.println(F("SignalSampler::readChannels"));
 	Serial.println(sizeof(float) * 7);
 #endif
 	//int aSignalValue = 0;
@@ -66,8 +63,9 @@ int SignalSampler::readChannels()
 	resetMeans();
 
 #ifdef DEBUG
-	Serial.print(F("sampleSize="));
+	Serial.print(F("SignalSampler::readChannels sampleSize="));
 	Serial.println(getSampleSize());
+	//Serial.println(gSAMPLESIZE);
 #endif
 
 	//for (int i = 0; i < this->sampleSize; i++){

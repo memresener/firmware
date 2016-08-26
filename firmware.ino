@@ -26,15 +26,6 @@
 bool reply = false;
 
 // commands
-const String InvalidCommandString = " - Invalid command syntax!";
-const String SXP = "SXP";   // set startingXPosition
-const String SYP = "SYP";   // set startingXPosition
-const String SZP = "SZP";   // set startingXPosition
-const String SXPq = "SXP?";   // startingXPosition
-const String SYPq = "SYP?";   // startingXPosition
-const String SZPq = "SZP?";   // startingXPosition
-const String LL = "LL";		// line length
-const String LLq = "LLq";
 
 /*!
 	Check <commandLine> for something of the form "<name> <number>"
@@ -114,13 +105,22 @@ RTx* phone = new RTx();
 DAC_AD5696* vc_dac = new DAC_AD5696();   // voice coil DAC
 DAC_AD5696* pz_dac = new DAC_AD5696();   // Piezo DAC
 //DAC_AD5696* vcdac = new DAC_AD5696();
-PiezoDACController* ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
-SignalSampler* sampler = new SignalSampler(sig_adc, diff_adc, SAMPLE_SIZE);
-Scanner* scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
+PiezoDACController* ctrl;
+SignalSampler* sampler;
+Scanner* scanner;
 
 //This function runs once, when the arduino starts
 void setup() {
 	Serial.begin(BAUDRATE);
+
+
+	ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
+	sampler = new SignalSampler(sig_adc, diff_adc, SAMPLE_SIZE);
+	scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
+
+
+
+
 	//Serial.print("Initialising I2C...");
 	unsigned char i2csetup = ADDAC::Setup(LDAC);
 	//Serial.println(i2csetup == 1 ? "success!" : "failed!");
@@ -133,7 +133,8 @@ void setup() {
 	pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
 
 	// start ADCs
-	//diff_adc->begin();
+	diff_adc->begin();
+	sig_adc->begin();
 
 
 	// initialise controller
@@ -213,11 +214,11 @@ void loop()
 		scanner->stream();
 	}
 
-	else if (cmd == SXPq)   // startXPlus (X starting point of scan)
+	else if (cmd == F("STARTXPLUS?"))   // startXPlus (X starting point of scan)
 	{
 		Serial.println(ctrl->startingXPlus);
 	}
-	else if (CheckSingleParameter(cmd, SXP, idx, boolean, SXP + InvalidCommandString))
+	else if (CheckSingleParameter(cmd, F("STARTXPLUS"), idx, boolean, F("STARTXPLUS error")))
 	{
 		if (reply)
 		{
@@ -345,16 +346,21 @@ void loop()
 	else if (cmd == F("SAMPLESIZE?"))   // get sample size
 	{
 		//Serial.print("LineLength is ");
-		Serial.println(sampler->getSampleSize());
+		//Serial.println(sampler->getSampleSize());gSAMPLESIZE
+		Serial.println(sampler->sampleSize);
+		//Serial.println(gSAMPLESIZE);
 	}
 	else if (CheckSingleParameter(cmd, F("SAMPLESIZE"), idx, boolean, F("SAMPLESIZE - Invalid command syntax!")))   // set the sample size
 	{
+		//sampler->setSampleSize(idx);
+		sampler->sampleSize = idx;
+		//gSAMPLESIZE = idx;
 		if (reply)
 		{
 			Serial.print("SaS=");
-			Serial.println(idx);
+			Serial.println(sampler->sampleSize);
+			//Serial.println(gSAMPLESIZE);
 		}
-		sampler->setSampleSize(idx);
 	}
 #endif
 

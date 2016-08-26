@@ -77,6 +77,7 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 	Serial.println(value);
 
 	Serial.print(F("X_PLUS&="));
+	Serial.flush();
 #endif
 
 	Serial.println(channels & X_PLUS);
@@ -93,6 +94,7 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 #ifdef DEBUG
 		Serial.print(F("PiezoDACController::GotoCoordinates Setting X_MINUS="));
 		Serial.println(value);
+		Serial.flush();
 #endif
 		currentXMinus = value;
 	}
@@ -102,6 +104,7 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 #ifdef DEBUG
 		Serial.print(F("PiezoDACController::GotoCoordinates Setting Y_PLUS="));
 		Serial.println(value);
+		Serial.flush();
 #endif
 		currentYPlus = value;
 	}
@@ -110,6 +113,7 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 #ifdef DEBUG
 		Serial.print(F("PiezoDACController::GotoCoordinates Setting Y_MINUS="));
 		Serial.println(value);
+		Serial.flush();
 #endif
 		currentYMinus = value;
 	}
@@ -117,12 +121,16 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 #ifdef DEBUG
 	Serial.print(F("PiezoDACController::GotoCoordinates X_PLUS="));
 	Serial.println(currentXPlus);
+	Serial.flush();
 	Serial.print(F("PiezoDACController::GotoCoordinates X_MINUS="));
 	Serial.println(currentXMinus);
+	Serial.flush();
 	Serial.print(F("PiezoDACController::GotoCoordinates Y_PLUS="));
 	Serial.println(currentYPlus);
+	Serial.flush();
 	Serial.print(F("PiezoDACController::GotoCoordinates Y_MINUS="));
 	Serial.println(currentYMinus);
+	Serial.flush();
 #endif
 
 	//if (channels & Y_PLUS) currentYPlus = value;

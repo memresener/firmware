@@ -5,3 +5,6 @@
 #endif
 
 #include "ADDAC.h"
+
+
+//extern int gSAMPLESIZE = 0;

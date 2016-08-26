@@ -48,6 +48,7 @@ int Scanner::scanLine() {
 	Serial.println(pixels == nullptr);
 	Serial.println(controller == nullptr);
 	Serial.println(sampler == nullptr);
+	Serial.flush();
 #endif
 
 #ifdef DEBUG
