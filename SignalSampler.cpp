@@ -8,7 +8,7 @@ SignalSampler::SignalSampler(void) {
 	//Serial.println("SignalSampler(void);");
 }
 
-SignalSampler::SignalSampler(Adafruit_ADS1015 *sig_adc, Adafruit_ADS1015 *diff_adc, int sampleSize)
+SignalSampler::SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff_adc, int sampleSize)
 {
 #ifdef DEBUG
 	Serial.println(F("SignalSampler"));

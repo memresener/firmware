@@ -41,7 +41,7 @@ class SignalSampler
 
 	public:
 		SignalSampler(void);
-		SignalSampler(Adafruit_ADS1015 *sig_adc, Adafruit_ADS1015 *diff_adc, int);
+		SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff_adc, int);
 		~SignalSampler();
 		int init(int);
 		int readChannels();

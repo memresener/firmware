@@ -134,13 +134,13 @@ extern String const PARAM_LINE_LENGTH;
 //This function keeps looping
 void loop()
 {
-	delay(20);
-	////pz_dac->SetOutput(15, 0xFFFF);
-	ctrl->SetDACOutput(15, 0x0000);
-	delay(20);
-	ctrl->SetDACOutput(15, 0xFFFF);
+	//delay(20);
+	//////pz_dac->SetOutput(15, 0xFFFF);
+	//ctrl->SetDACOutput(15, 0x0000);
+	//delay(20);
+	//ctrl->SetDACOutput(15, 0xFFFF);
 
-	return;
+	//return;
 
 	//// listen for command
 	//String cmd = Serial.readStringUntil(';');
