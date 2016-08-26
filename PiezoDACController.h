@@ -127,7 +127,7 @@ public:
 
 	// return line size.
 	int getLineSize();
-	void setLineSize(int lineSize) { this->lineSize = lineSize; }
+	void setLineSize(int lineSize);
 
 	// move to the first pixel of the new line.
 	unsigned int nextLine();
@@ -142,7 +142,7 @@ public:
 	void invert();
 
 	int getStepSize() { return stepSize; }
-	void setStepSize(int stepSize) { this->stepSize = stepSize; }
+	void setStepSize(int stepSize);
 
 	int getCurrentX() { return currentX; }
 	int getCurrentY() { return currentY; }

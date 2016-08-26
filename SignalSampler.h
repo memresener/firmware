@@ -29,6 +29,8 @@ class SignalSampler
 		Adafruit_ADS1015 *sig_adc;
 		Adafruit_ADS1015 *diff_adc;
 
+		int sampleSize;
+
 		// 0 - A minus B
 		// 1 - C minus D
 		// 2 - Sum
@@ -46,7 +48,7 @@ class SignalSampler
 		int detectRandom();
 		int reset();
 		int getSampleSize() { return sampleSize; }
-		void setSampleSize(int sampleSize) { this->sampleSize = sampleSize; }
+		void setSampleSize(int sampleSize);
 		float getAMinusB() { return sampleMeans[0]; }
 		float getCMinusD() { return sampleMeans[1]; }
 		float getSum() { return sampleMeans[2]; }
@@ -54,8 +56,6 @@ class SignalSampler
 		float getB() { return sampleMeans[4]; }
 		float getC() { return sampleMeans[5]; }
 		float getD() { return sampleMeans[6]; }
-
-		int sampleSize;
 };
 
 #endif

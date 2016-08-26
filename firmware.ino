@@ -113,7 +113,7 @@ Scanner* scanner;
 void setup() {
 	Serial.begin(BAUDRATE);
 
-
+	Serial.println("setup()");
 	ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
 	sampler = new SignalSampler(sig_adc, diff_adc, SAMPLE_SIZE);
 	scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
@@ -146,6 +146,7 @@ extern String const PARAM_LINE_LENGTH;
 //This function keeps looping
 void loop()
 {
+	Serial.println("loop()");
 	//delay(20);
 	//////pz_dac->SetOutput(15, 0xFFFF);
 	//ctrl->SetDACOutput(15, 0x0000);
@@ -183,20 +184,31 @@ void loop()
 	}
 	else if (cmd == F("SETUP"))
 	{
-		delete ctrl;
-		delete sampler;
-		delete scanner;
+		//delete ctrl;
+		//delete sampler;
+		//delete scanner;
 
 		int CUSTOM_STEPSIZE = Serial.parseInt();
 		int CUSTOM_LINE_LENGTH = Serial.parseInt();
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
 
-		ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
-		sampler = new SignalSampler(sig_adc, diff_adc, CUSTOM_SAMPLE_SIZE);
-		scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
+		Serial.print(F("STEP_SIZE="));
+		Serial.println(CUSTOM_STEPSIZE);
+		Serial.print(F("CUSTOM_LINE_LENGTH="));
+		Serial.println(CUSTOM_LINE_LENGTH);
+		Serial.print("CUSTOM_SAMPLE_SIZE=");
+		Serial.println(CUSTOM_SAMPLE_SIZE);
+
+		//ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
+		//sampler = new SignalSampler(sig_adc, diff_adc, CUSTOM_SAMPLE_SIZE);
+		//scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
+		ctrl->setLineSize(CUSTOM_LINE_LENGTH);
+		ctrl->setStepSize(CUSTOM_STEPSIZE);
+		sampler->setSampleSize(CUSTOM_SAMPLE_SIZE);
+	
 
 		// initialise the controller
-		ctrl->Init();
+		//ctrl->Init();
 
 		if (reply)
 		{
@@ -346,19 +358,20 @@ void loop()
 	else if (cmd == F("SAMPLESIZE?"))   // get sample size
 	{
 		//Serial.print("LineLength is ");
-		//Serial.println(sampler->getSampleSize());gSAMPLESIZE
-		Serial.println(sampler->sampleSize);
+		Serial.println(sampler->getSampleSize());
+		//Serial.println(sampler->sampleSize);
 		//Serial.println(gSAMPLESIZE);
 	}
 	else if (CheckSingleParameter(cmd, F("SAMPLESIZE"), idx, boolean, F("SAMPLESIZE - Invalid command syntax!")))   // set the sample size
 	{
-		//sampler->setSampleSize(idx);
-		sampler->sampleSize = idx;
+		sampler->setSampleSize(idx);
+		//sampler->sampleSize = idx;
 		//gSAMPLESIZE = idx;
 		if (reply)
 		{
 			Serial.print("SaS=");
-			Serial.println(sampler->sampleSize);
+			//Serial.println(sampler->sampleSize);
+			Serial.println(sampler->getSampleSize());
 			//Serial.println(gSAMPLESIZE);
 		}
 	}

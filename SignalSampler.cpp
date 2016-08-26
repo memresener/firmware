@@ -64,7 +64,9 @@ int SignalSampler::readChannels()
 
 #ifdef DEBUG
 	Serial.print(F("SignalSampler::readChannels sampleSize="));
-	Serial.println(getSampleSize());
+	Serial.print(getSampleSize());
+	Serial.print(F(":"));
+	Serial.println((int)&(this->sampleSize));
 	//Serial.println(gSAMPLESIZE);
 #endif
 
@@ -135,6 +137,17 @@ int SignalSampler::detectRandom()
 
 int SignalSampler::reset() {
 	return 0;
+}
+
+void SignalSampler::setSampleSize(int sampleSize)
+{
+	this->sampleSize = sampleSize;
+#ifdef DEBUG
+	Serial.print(F("SignalSampler::setSampleSize sampleSize="));
+	Serial.print(this->sampleSize);
+	Serial.print(F(":"));
+	Serial.println((int)&(this->sampleSize));
+#endif
 }
 
 void SignalSampler::resetMeans()

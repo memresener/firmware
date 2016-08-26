@@ -111,7 +111,7 @@ int Scanner::scanLine() {
 	linesScanned++;
 
 #ifdef DEBUG
-	Serial.print(F("Scanner::scanLine - Finish"));
+	Serial.print(F("Scanner::scanLine - Finished"));
 #endif
 
 	return 0;
@@ -134,6 +134,11 @@ int Scanner::start() {
 //	Serial.print(F("Y_MINUS="));
 //	Serial.println(controller->getCurrentYMinus());
 //#endif
+
+#ifdef DEBUG
+	Serial.print(F("Scanner::start lineLength="));
+	Serial.println(lineLength);
+#endif
 
 	// get start time
 	startTime = millis();

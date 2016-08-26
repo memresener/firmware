@@ -373,10 +373,15 @@ unsigned int PiezoDACController::eol() {
 unsigned int PiezoDACController::increaseVoltage() {
 
 #ifdef DEBUG
-	Serial.print(F("PiezoDACController::increaseVoltage X_PLUS="));	Serial.println(currentXPlus);
-	Serial.print(F("PiezoDACController::increaseVoltage X_MINUS=")); Serial.println(currentXMinus);
-	Serial.print(F("PiezoDACController::increaseVoltage Y_PLUS="));	Serial.println(currentYPlus);
-	Serial.print(F("PiezoDACController::increaseVoltage Y_MINUS=")); Serial.println(currentYMinus);
+	Serial.print(F("PiezoDACController::increaseVoltage stepSize="));
+	Serial.print(stepSize);
+	Serial.print(F(":"));
+	Serial.println((int)&(this->stepSize));
+	Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage X_PLUS="));	Serial.println(currentXPlus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage X_MINUS=")); Serial.println(currentXMinus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage Y_PLUS="));	Serial.println(currentYPlus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage Y_MINUS=")); Serial.println(currentYMinus); Serial.flush();
 #endif
   // step fwd
   //currentStep += stepSize;
@@ -392,8 +397,17 @@ unsigned int PiezoDACController::increaseVoltage() {
 }
 
 // decrease voltage
-unsigned int PiezoDACController::decreaseVoltage() {
+unsigned int PiezoDACController::decreaseVoltage() 
+{
 
+
+#ifdef DEBUG
+	Serial.print(F("PiezoDACController::increaseVoltage stepSize=")); Serial.println(stepSize); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage X_PLUS="));	Serial.println(currentXPlus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage X_MINUS=")); Serial.println(currentXMinus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage Y_PLUS="));	Serial.println(currentYPlus); Serial.flush();
+	Serial.print(F("PiezoDACController::increaseVoltage Y_MINUS=")); Serial.println(currentYMinus); Serial.flush();
+#endif
   // step back
   //currentStep -= stepSize;
 
@@ -409,6 +423,17 @@ unsigned int PiezoDACController::decreaseVoltage() {
 // return current line size.
 int PiezoDACController::getLineSize() {
   return lineSize;
+}
+
+void PiezoDACController::setLineSize(int lineSize)
+{
+	this->lineSize = lineSize;
+#ifdef DEBUG
+	Serial.print(F("PiezoDACController::setLineSize lineSize="));
+	Serial.print(this->lineSize);
+	Serial.print(F(":"));
+	Serial.println((int)&(this->lineSize));
+#endif
 }
 
 // get the position
@@ -435,6 +460,17 @@ int PiezoDACController::GetPosition(PIEZO_AXIS axis)
 		return currentZ;
 		break;
 	}
+}
+
+void PiezoDACController::setStepSize(int stepSize)
+{
+	this->stepSize = stepSize;
+#ifdef DEBUG
+	Serial.print(F("PiezoDACController::setStepSize stepSize="));
+	Serial.print(this->stepSize);
+	Serial.print(F(":"));
+	Serial.println((int)&(this->stepSize));
+#endif
 }
 
 void PiezoDACController::invert() {
