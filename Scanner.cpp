@@ -71,7 +71,11 @@ int Scanner::scanLine() {
 			controller->increaseVoltage();
 		}
 
-		if (scanDelay > 0) delayMicroseconds(scanDelay);
+#ifdef DEBUG
+		Serial.print(F("Delaying for "));
+		Serial.println(i);
+#endif
+		if (scanDelay > 0) delay(scanDelay);
 	}
 
 	//retrace
@@ -95,7 +99,7 @@ int Scanner::scanLine() {
 			controller->decreaseVoltage();
 		}
 
-		if (scanDelay > 0) delayMicroseconds(scanDelay);
+		if (scanDelay > 0) delay(scanDelay);
 	}
 
 	linesScanned++;

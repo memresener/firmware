@@ -95,8 +95,8 @@ bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok,
 
 
 /* Setup */
-Adafruit_ADS1015 sig_adc(0x49);   // adc with raw signal input (A, B, C and D)
-Adafruit_ADS1015 diff_adc(0x48);   // adc with the sum and difference signals
+Adafruit_ADS1015 *sig_adc = new Adafruit_ADS1015 (0x49);   // adc with raw signal input (A, B, C and D)
+Adafruit_ADS1015 *diff_adc = new Adafruit_ADS1015(0x48);   // adc with the sum and difference signals
 RTx* phone = new RTx();
 
 
@@ -104,7 +104,7 @@ DAC_AD5696* vc_dac = new DAC_AD5696();   // voice coil DAC
 DAC_AD5696* pz_dac = new DAC_AD5696();   // Piezo DAC
 //DAC_AD5696* vcdac = new DAC_AD5696();
 PiezoDACController* ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
-SignalSampler* sampler = new SignalSampler(&sig_adc, &diff_adc, SAMPLE_SIZE);
+SignalSampler* sampler = new SignalSampler(sig_adc, diff_adc, SAMPLE_SIZE);
 Scanner* scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
 
 //This function runs once, when the arduino starts
@@ -122,7 +122,8 @@ void setup() {
 	pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
 
 	// start ADCs
-	diff_adc.begin();
+	//diff_adc->begin();
+
 
 	// initialise controller
 	ctrl->Init();
@@ -133,13 +134,13 @@ extern String const PARAM_LINE_LENGTH;
 //This function keeps looping
 void loop()
 {
-	//delay(20);
-	//////pz_dac->SetOutput(15, 0xFFFF);
-	//ctrl->SetDACOutput(15, 0x0000);
-	//delay(20);
-	//ctrl->SetDACOutput(15, 0xFFFF);
+	delay(20);
+	////pz_dac->SetOutput(15, 0xFFFF);
+	ctrl->SetDACOutput(15, 0x0000);
+	delay(20);
+	ctrl->SetDACOutput(15, 0xFFFF);
 
-	//return;
+	return;
 
 	//// listen for command
 	//String cmd = Serial.readStringUntil(';');
@@ -179,7 +180,7 @@ void loop()
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
 
 		ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
-		sampler = new SignalSampler(&sig_adc, &diff_adc, CUSTOM_SAMPLE_SIZE);
+		sampler = new SignalSampler(sig_adc, diff_adc, CUSTOM_SAMPLE_SIZE);
 		scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
 
 		// initialise the controller
@@ -303,7 +304,7 @@ void loop()
 	else if (cmd == F("SCANDELAY?"))  // get the scan delay in micros
 	{
 		//Serial.print("LineLength is ");
-		Serial.println(ctrl->getStepSize());
+		Serial.println(scanner->getScanDelay());
 	}
 	else if (CheckSingleParameter(cmd, F("SCANDELAY"), idx, boolean, F("SCANDELAY - Invalid command syntax!")))  // set scan delay in micros
 	{
@@ -406,7 +407,7 @@ void loop()
 	{
 		if (idx < 0 || idx > 3)
 		{
-			uint16 = diff_adc.readADC_SingleEnded(idx - 1);
+			uint16 = diff_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
 			{
 				Serial.print("Channel ");
@@ -426,7 +427,7 @@ void loop()
 	{
 		if (idx < 0 || idx > 3)
 		{
-			uint16 = sig_adc.readADC_SingleEnded(idx - 1);
+			uint16 = sig_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
 			{
 				Serial.print("Channel ");
@@ -450,22 +451,22 @@ void loop()
 			switch (idx)
 			{
 			case 0:
-				diff_adc.setGain(GAIN_TWOTHIRDS);
+				diff_adc->setGain(GAIN_TWOTHIRDS);
 				break;
 			case 1:
-				diff_adc.setGain(GAIN_ONE);
+				diff_adc->setGain(GAIN_ONE);
 				break;
 			case 2:
-				diff_adc.setGain(GAIN_TWO);
+				diff_adc->setGain(GAIN_TWO);
 				break;
 			case 3:
-				diff_adc.setGain(GAIN_FOUR);
+				diff_adc->setGain(GAIN_FOUR);
 				break;
 			case 4:
-				diff_adc.setGain(GAIN_EIGHT);
+				diff_adc->setGain(GAIN_EIGHT);
 				break;
 			case 5:
-				diff_adc.setGain(GAIN_SIXTEEN);
+				diff_adc->setGain(GAIN_SIXTEEN);
 				break;
 			}
 			if (reply)
@@ -493,22 +494,22 @@ void loop()
 			switch (idx)
 			{
 			case 0:
-				sig_adc.setGain(GAIN_TWOTHIRDS);
+				sig_adc->setGain(GAIN_TWOTHIRDS);
 				break;
 			case 1:
-				sig_adc.setGain(GAIN_ONE);
+				sig_adc->setGain(GAIN_ONE);
 				break;
 			case 2:
-				sig_adc.setGain(GAIN_TWO);
+				sig_adc->setGain(GAIN_TWO);
 				break;
 			case 3:
-				sig_adc.setGain(GAIN_FOUR);
+				sig_adc->setGain(GAIN_FOUR);
 				break;
 			case 4:
-				sig_adc.setGain(GAIN_EIGHT);
+				sig_adc->setGain(GAIN_EIGHT);
 				break;
 			case 5:
-				sig_adc.setGain(GAIN_SIXTEEN);
+				sig_adc->setGain(GAIN_SIXTEEN);
 				break;
 			}
 			if (reply)

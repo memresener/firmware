@@ -63,7 +63,7 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
   return currentStep;
 }
 
-#undef DEBUG
+//#undef DEBUG
 
 /*! Set the DAC output and update internal position. */
 int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)

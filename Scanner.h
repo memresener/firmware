@@ -60,7 +60,7 @@ private:
 	// scans one line (trace and retrace) storing the data in the pixels array.
 	int scanLine();
 
-	// number of microseconds delay between scan steps
+	// number of millis delay between scan steps
 	unsigned int scanDelay;
 
 
@@ -92,7 +92,7 @@ public:
 	//
 	void invertChannels();
 
-	void setScanDelay(int scanDelayMs) { scanDelay = scanDelayMs; }
+	void setScanDelay(unsigned int scanDelayMs) { scanDelay = scanDelayMs; }
 	unsigned int getScanDelay() { return scanDelay; }
 };
 
