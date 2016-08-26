@@ -42,18 +42,51 @@ void Scanner::reset()
 int Scanner::scanLine() {
 	unsigned int x = 0;
 
+#ifdef DEBUG
+	Serial.println(F("Scanner::scanLine()"));
+	Serial.println(pixels == nullptr);
+	Serial.println(controller == nullptr);
+	Serial.println(sampler == nullptr);
+#endif
+
 	//trace
 	for (int i = 0; i < controller->getLineSize(); i++) {
-		pixels[x] = sampler->detectPixel();
+#ifdef DEBUG
+		Serial.print(F("Detecting line forwards "));
+		Serial.println(i);
+#endif
+		sampler->readChannels();
+
+		// calculate and save FES
+		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
 		x++;
+
+#ifdef DEBUG
+		Serial.print(F("Stepping forwards "));
+		Serial.println(i);
+#endif
 		if (i + 1 < controller->getLineSize())
+		{
 			controller->increaseVoltage();
+		}
 	}
 
 	//retrace
 	for (int i = 0; i < controller->getLineSize(); i++) {
-		pixels[x] = sampler->detectPixel();
+#ifdef DEBUG
+		Serial.print(F("Detecting line backwards"));
+		Serial.println(i);
+#endif
+		sampler->readChannels();
+
+		// calculate and save FES
+		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
 		x++;
+
+#ifdef DEBUG
+		Serial.print(F("Stepping backwards "));
+		Serial.println(i);
+#endif
 		if(i + 1 < controller->getLineSize())
 			controller->decreaseVoltage();
 	}
@@ -67,15 +100,19 @@ int Scanner::scanLine() {
 int Scanner::start() {
 
 #ifdef DEBUG
-	Serial.print(F("X_PLUS="));
-	Serial.println(controller->getCurrentXPlus());
-	Serial.print(F("X_MINUS="));
-	Serial.println(controller->getCurrentXMinus());
-	Serial.print(F("Y_PLUS="));
-	Serial.println(controller->getCurrentYPlus());
-	Serial.print(F("Y_MINUS="));
-	Serial.println(controller->getCurrentYMinus());
+	Serial.println(F("Scanner::start()"));
 #endif
+
+//#ifdef DEBUG
+//	Serial.print(F("X_PLUS="));
+//	Serial.println(controller->getCurrentXPlus());
+//	Serial.print(F("X_MINUS="));
+//	Serial.println(controller->getCurrentXMinus());
+//	Serial.print(F("Y_PLUS="));
+//	Serial.println(controller->getCurrentYPlus());
+//	Serial.print(F("Y_MINUS="));
+//	Serial.println(controller->getCurrentYMinus());
+//#endif
 
 	// get start time
 	startTime = millis();
@@ -109,7 +146,7 @@ int Scanner::stream() {
 	int data[1];
 	bool streaming = 1;
 	while (true) {
-		data[0] = sampler->detectPixel();
+		data[0] = sampler->readChannels();
 		streaming = phone->sendData(data, 1);
 		if (streaming == false)
 			break;

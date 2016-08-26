@@ -104,7 +104,7 @@ DAC_AD5696* vc_dac = new DAC_AD5696();   // voice coil DAC
 DAC_AD5696* pz_dac = new DAC_AD5696();   // Piezo DAC
 //DAC_AD5696* vcdac = new DAC_AD5696();
 PiezoDACController* ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
-SignalSampler* sampler = new SignalSampler(diff_adc, SAMPLE_SIZE);
+SignalSampler* sampler = new SignalSampler(&sig_adc, &diff_adc, SAMPLE_SIZE);
 Scanner* scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
 
 //This function runs once, when the arduino starts
@@ -179,7 +179,7 @@ void loop()
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
 
 		ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
-		sampler = new SignalSampler(sig_adc, CUSTOM_SAMPLE_SIZE);
+		sampler = new SignalSampler(&sig_adc, &diff_adc, CUSTOM_SAMPLE_SIZE);
 		scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
 
 		// initialise the controller
@@ -265,16 +265,16 @@ void loop()
 	////////////////
 	//// LINE LENGTH
 	////////////////
-	else if (cmd == LLq)
+	else if (cmd == F("LINELENGTH?"))
 	{
 		//Serial.print("LineLength is ");
 		Serial.println(ctrl->getLineSize());
 	}
-	else if (CheckSingleParameter(cmd, LL, idx, boolean, LL + InvalidCommandString))
+	else if (CheckSingleParameter(cmd, F("LINELENGTH"), idx, boolean, F("LINELENGTH y - where y is integer to set.")))
 	{
 		if (reply)
 		{
-			Serial.print("LL=");
+			Serial.print(F("LINELENGTH="));
 			Serial.println(idx);
 		}
 		ctrl->setLineSize(idx);
@@ -353,32 +353,152 @@ void loop()
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// ADC COMMANDS
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//#define ADCCOMMANDS
+#define ADCCOMMANDS
 #ifdef ADCCOMMANDS
 
-	else if (CheckSingleParameter(cmd, "ADCDIFF::GET", idx, boolean, "ADCDIFF::GET - Invalid command syntax!"))
+	else if (cmd == F("SIG?"))
 	{
-		uint16 = diff_adc.readADC_SingleEnded(idx - 1);
-		if (reply)
-		{
-			Serial.print("Channel ");
-			Serial.print(idx - 1);
-			Serial.print(" is ");
-			Serial.println(idx);
-		}
-		Serial.println(uint16);
+		sampler->readChannels();
+		if (reply) Serial.print(F("A-B="));
+		Serial.println(sampler->getAMinusB());
+		if (reply) Serial.print(F("C-D="));
+		Serial.println(sampler->getCMinusD());
+		if (reply) Serial.print(F("SUM="));
+		Serial.println(sampler->getSum());
+		if (reply) Serial.print(F("A="));
+		Serial.println(sampler->getA());
+		if (reply) Serial.print(F("B="));
+		Serial.println(sampler->getB());
+		if (reply) Serial.print(F("C="));
+		Serial.println(sampler->getC());
+		if (reply) Serial.print(F("D="));
+		Serial.println(sampler->getD());
 	}
-	else if (CheckSingleParameter(cmd, "ADCSIG::GET", idx, boolean, "ADCSIG::GET - Invalid command syntax!"))
+
+	// read single channel from diff
+	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, boolean, "DIFFADC::GET - Invalid command syntax!"))
 	{
-		uint16 = diff_adc.readADC_SingleEnded(idx - 1);
-		if (reply)
+		if (idx < 0 || idx > 3)
 		{
-			Serial.print("Channel ");
-			Serial.print(idx - 1);
-			Serial.print(" is ");
-			Serial.println(idx);
+			uint16 = diff_adc.readADC_SingleEnded(idx - 1);
+			if (reply)
+			{
+				Serial.print("Channel ");
+				Serial.print(idx - 1);
+				Serial.print(" is ");
+				Serial.println(idx);
+			}
+			Serial.println(uint16);
 		}
-		Serial.println(uint16);
+		else {
+			if (reply) Serial.println(F("Channel number must be 0 - 3"));
+		}
+	}
+
+	// read single channel from sig
+	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, boolean, F("SIGADC::GET y - y is int (channel)!")))
+	{
+		if (idx < 0 || idx > 3)
+		{
+			uint16 = sig_adc.readADC_SingleEnded(idx - 1);
+			if (reply)
+			{
+				Serial.print("Channel ");
+				Serial.print(idx - 1);
+				Serial.print(" is ");
+				Serial.println(idx);
+			}
+			Serial.println(uint16);
+
+		}
+		else {
+			if (reply) Serial.println(F("Channel number must be 0 - 3"));
+		}
+	}
+
+	// set gain
+	else if (CheckSingleParameter(cmd, F("DIFFADC::GAIN"), idx, boolean, F("DIFFADC::GAIN - Invalid command syntax!")))
+	{
+		if (idx >= 0 && idx <= 5)
+		{
+			switch (idx)
+			{
+			case 0:
+				diff_adc.setGain(GAIN_TWOTHIRDS);
+				break;
+			case 1:
+				diff_adc.setGain(GAIN_ONE);
+				break;
+			case 2:
+				diff_adc.setGain(GAIN_TWO);
+				break;
+			case 3:
+				diff_adc.setGain(GAIN_FOUR);
+				break;
+			case 4:
+				diff_adc.setGain(GAIN_EIGHT);
+				break;
+			case 5:
+				diff_adc.setGain(GAIN_SIXTEEN);
+				break;
+			}
+			if (reply)
+			{
+				Serial.print(F("Gain of DIFF adc = "));
+				Serial.println(idx);
+			}
+		}
+		else {
+			if (reply)
+			{
+				Serial.print(F("Gain index "));
+				Serial.print(idx);
+				Serial.println(F(" must be 0 - 5"));
+			}
+		}
+	}
+
+
+	// set gain
+	else if (CheckSingleParameter(cmd, F("SIGADC::GAIN"), idx, boolean, F("SIGADC::GET - Invalid command syntax!")))
+	{
+		if (idx >= 0 && idx <= 5)
+		{
+			switch (idx)
+			{
+			case 0:
+				sig_adc.setGain(GAIN_TWOTHIRDS);
+				break;
+			case 1:
+				sig_adc.setGain(GAIN_ONE);
+				break;
+			case 2:
+				sig_adc.setGain(GAIN_TWO);
+				break;
+			case 3:
+				sig_adc.setGain(GAIN_FOUR);
+				break;
+			case 4:
+				sig_adc.setGain(GAIN_EIGHT);
+				break;
+			case 5:
+				sig_adc.setGain(GAIN_SIXTEEN);
+				break;
+			}
+			if (reply)
+			{
+				Serial.print(F("Gain of SIG adc = "));
+				Serial.println(idx);
+			}
+		}
+		else {
+			if (reply)
+			{
+				Serial.print(F("Gain index "));
+				Serial.print(idx);
+				Serial.println(F(" must be 0 - 5"));
+			}
+		}
 	}
 
 #endif
