@@ -94,6 +94,17 @@ bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok,
 }
 
 
+int availableMemory() {
+	// Use 1024 with ATmega168
+	int size = 2048;
+	byte *buf;
+	while ((buf = (byte *)malloc(--size)) == NULL);
+	free(buf);
+	return size;
+}
+
+
+
 /* Setup */
 Adafruit_ADS1015 *sig_adc = new Adafruit_ADS1015 (0x49);   // adc with raw signal input (A, B, C and D)
 Adafruit_ADS1015 *diff_adc = new Adafruit_ADS1015(0x48);   // adc with the sum and difference signals

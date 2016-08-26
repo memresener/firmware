@@ -50,10 +50,15 @@ int Scanner::scanLine() {
 	Serial.println(sampler == nullptr);
 #endif
 
+#ifdef DEBUG
+	Serial.print(F("Scanner::scanLine - Delaying for "));
+	Serial.println(scanDelay);
+#endif
+
 	//trace
 	for (int i = 0; i < controller->getLineSize(); i++) {
 #ifdef DEBUG
-		Serial.print(F("Detecting line forwards "));
+		Serial.print(F("Scanner::scanLine - Detecting line forwards "));
 		Serial.println(i);
 #endif
 		sampler->readChannels();
@@ -63,7 +68,7 @@ int Scanner::scanLine() {
 		x++;
 
 #ifdef DEBUG
-		Serial.print(F("Stepping forwards "));
+		Serial.print(F("Scanner::scanLine - Stepping forwards "));
 		Serial.println(i);
 #endif
 		if (i + 1 < controller->getLineSize())
@@ -72,8 +77,8 @@ int Scanner::scanLine() {
 		}
 
 #ifdef DEBUG
-		Serial.print(F("Delaying for "));
-		Serial.println(i);
+		Serial.print(F("Scanner::scanLine - Delaying for "));
+		Serial.println(scanDelay);
 #endif
 		if (scanDelay > 0) delay(scanDelay);
 	}
@@ -81,7 +86,7 @@ int Scanner::scanLine() {
 	//retrace
 	for (int i = 0; i < controller->getLineSize(); i++) {
 #ifdef DEBUG
-		Serial.print(F("Detecting line backwards"));
+		Serial.print(F("Scanner::scanLine - Detecting line backwards"));
 		Serial.println(i);
 #endif
 		sampler->readChannels();
@@ -91,7 +96,7 @@ int Scanner::scanLine() {
 		x++;
 
 #ifdef DEBUG
-		Serial.print(F("Stepping backwards "));
+		Serial.print(F("Scanner::scanLine - Stepping backwards "));
 		Serial.println(i);
 #endif
 		if (i + 1 < controller->getLineSize())
@@ -103,6 +108,10 @@ int Scanner::scanLine() {
 	}
 
 	linesScanned++;
+
+#ifdef DEBUG
+	Serial.print(F("Scanner::scanLine - Finish"));
+#endif
 
 	return 0;
 }
@@ -133,7 +142,7 @@ int Scanner::start() {
 	for (int i = 0; i < lineLength; i++) {
 
 #ifdef DEBUG
-		Serial.print(F("Line "));
+		Serial.print(F("Scanner::start Line "));
 		Serial.println(i);
 #endif
 
@@ -170,7 +179,7 @@ int Scanner::stream() {
 int Scanner::stop() {
 
 #ifdef DEBUG
-	Serial.println("Scan complete");
+	Serial.println("Scanner::stop Scan complete");
 #endif
 
 	// calculate lapsed time
