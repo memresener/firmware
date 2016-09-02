@@ -6,7 +6,7 @@
 
 
 // turn on debug messages over COM
-#define DEBUG
+//#define DEBUG
 
 // constructor
 PiezoDACController::PiezoDACController(ADDAC *dac, int stepSize, int lineLength, int ldacPin) {
@@ -69,52 +69,24 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 {
 	dac->SetOutput(channels, value);
-
-#ifdef DEBUG
-	Serial.print("Setting DAC channel ");
-	Serial.print(channels);
-	Serial.print(" to ");
-	Serial.println(value);
-
-	Serial.print(F("X_PLUS&="));
-	Serial.flush();
-#endif
-
-	Serial.println(channels & X_PLUS);
+  
 	if (channels & X_PLUS)
 	{
-#ifdef DEBUG
-		Serial.print(F("Setting X_PLUS="));
-		Serial.println(value);
-#endif
 		currentXPlus = value;
 	}
+ 
 	if (channels & X_MINUS)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Setting X_MINUS="));
-		Serial.println(value);
-		Serial.flush();
-#endif
 		currentXMinus = value;
 	}
 
 	if (channels & Y_PLUS)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Setting Y_PLUS="));
-		Serial.println(value);
-		Serial.flush();
-#endif
 		currentYPlus = value;
 	}
+ 
 	if (channels & Y_MINUS)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Setting Y_MINUS="));
-		Serial.println(value);
-		Serial.flush();
-#endif
 		currentYMinus = value;
 	}
 
@@ -133,35 +105,14 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 	Serial.flush();
 #endif
 
-	//if (channels & Y_PLUS) currentYPlus = value;
-	//if (channels & Y_MINUS) currentYMinus = value;
-
-
 	return 0;
 }
 
-//int PiezoDACController::SetDACOutput(uint8_t channels, double value, double vRef)
-//{
-//	dac->SetVoltage(channels, value, vRef);
-//#ifdef DEBUG
-//	Serial.print("Setting DAC channel ");
-//	Serial.print(channels);
-//	Serial.print(" to ");
-//	Serial.println(value);
-//#endif
-//
-//	if (channels & X_PLUS) currentXPlus = value;
-//	if (channels & X_MINUS) currentXMinus = value;
-//	if (channels & Y_PLUS) currentYPlus = value;
-//	if (channels & Y_MINUS) currentYMinus = value;
-//
-//
-//	return 0;
-//}
 
 int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 {
-	//int diff = allAtOnce ? steps : (steps > 0 ? 1 : -1); // if all at once, change voltage by full amount in one go.  Otherwise one at a time.
+	//int diff = allAtOnce ? steps : (steps > 0 ? 1 : -1); // if all at once, change voltage by full amount in 
+	//one go.  Otherwise one at a time.
 	//int lim = allAtOnce ? 1 : steps;  // if all in one go, only do once, otherwise do each step
 	int diff = steps;
 	int lim = 1;
@@ -181,7 +132,6 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 	Serial.println(currentZ);
 #endif
 
-
 #ifdef DEBUG
 	Serial.print(F("PiezoDACController::GotoCoordinates X_PLUS="));
 	Serial.println(currentXPlus);
@@ -194,6 +144,7 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 #endif
 
 	// Decide what to move where
+  
 	switch (direction)
 	{
 		// for Z up/down, increment/decrement all dac channels
@@ -213,6 +164,7 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 	case X:
 		///diff = direction == X_UP ? adiff : -adiff;  // increase or decrease?
+   
 		currentPlus = currentXPlus;
 		currentMinus = currentXMinus;
 		channelPlus = X_PLUS;
@@ -222,6 +174,7 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 	case Y:
 		//diff = direction == Y_UP ? adiff : -adiff;  // increase or decrease?
+    
 		currentPlus = currentYPlus;
 		currentMinus = currentYMinus;
 		channelPlus = Y_PLUS;

@@ -58,7 +58,7 @@ private:
 	// indicates if scanning is in progress.
 	bool scanning;
 	// scans one line (trace and retrace) storing the data in the pixels array.
-	int scanLine();
+	int scanLine(unsigned int lineSize);
 
 	// number of millis delay between scan steps
 	unsigned int scanDelay;

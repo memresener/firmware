@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 
 // Author A Michel
 // Date 20 08 15
@@ -8,15 +8,17 @@
 #include "RTx.h"
 
 // Constructor
-Scanner::Scanner(PiezoDACController *controller, SignalSampler *sampler, const RTx *phone, const int lineLength)
+Scanner::Scanner(PiezoDACController *controll, SignalSampler *sample, const RTx *phon, const int lineLeng)
 {
 	this->pixels = new int[lineLength * 2];
-	this->controller = controller;
+	this->controller = controll;
 	this->startTime = 0;
 	this->endTime = 0;
 	this->scanning = false;
-	this->lineLength = lineLength;
+	this->lineLength = lineLeng;
 	this->scanDelay = 0;
+  this->sampler=sample;
+  this->phone=phon;
 }
 
 // Destructor
@@ -40,67 +42,36 @@ void Scanner::reset()
 
 // Scans one line and stores data in the pixel array.
 // Does a trace and retrace. The retrace data will be in backward order.
-int Scanner::scanLine() {
+int Scanner::scanLine(unsigned int lineSize) {
+  
 	unsigned int x = 0;
-
-#ifdef DEBUG
-	Serial.println(F("Scanner::scanLine()"));
-	Serial.println(pixels == nullptr);
-	Serial.println(controller == nullptr);
-	Serial.println(sampler == nullptr);
-	Serial.flush();
-#endif
-
-#ifdef DEBUG
-	Serial.print(F("Scanner::scanLine - Delaying for "));
-	Serial.println(scanDelay);
-#endif
-
 	//trace
-	for (int i = 0; i < controller->getLineSize(); i++) {
-#ifdef DEBUG
-		Serial.print(F("Scanner::scanLine - Detecting line forwards "));
-		Serial.println(i);
-#endif
+	for (int i = 0; i < lineSize; i++) {
+
 		sampler->readChannels();
 
 		// calculate and save FES
 		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
 		x++;
 
-#ifdef DEBUG
-		Serial.print(F("Scanner::scanLine - Stepping forwards "));
-		Serial.println(i);
-#endif
-		if (i + 1 < controller->getLineSize())
+		if (i + 1 < lineSize)
 		{
 			controller->increaseVoltage();
 		}
 
-#ifdef DEBUG
-		Serial.print(F("Scanner::scanLine - Delaying for "));
-		Serial.println(scanDelay);
-#endif
 		if (scanDelay > 0) delay(scanDelay);
 	}
 
 	//retrace
-	for (int i = 0; i < controller->getLineSize(); i++) {
-#ifdef DEBUG
-		Serial.print(F("Scanner::scanLine - Detecting line backwards"));
-		Serial.println(i);
-#endif
+	for (int i = 0; i < lineSize; i++) {
+
 		sampler->readChannels();
 
 		// calculate and save FES
 		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
 		x++;
 
-#ifdef DEBUG
-		Serial.print(F("Scanner::scanLine - Stepping backwards "));
-		Serial.println(i);
-#endif
-		if (i + 1 < controller->getLineSize())
+		if (i + 1 < lineSize)
 		{
 			controller->decreaseVoltage();
 		}
@@ -110,9 +81,6 @@ int Scanner::scanLine() {
 
 	linesScanned++;
 
-#ifdef DEBUG
-	Serial.print(F("Scanner::scanLine - Finished"));
-#endif
 
 	return 0;
 }
@@ -120,42 +88,19 @@ int Scanner::scanLine() {
 // Start the scanning process.
 int Scanner::start() {
 
-#ifdef DEBUG
-	Serial.println(F("Scanner::start()"));
-#endif
 
-//#ifdef DEBUG
-//	Serial.print(F("X_PLUS="));
-//	Serial.println(controller->getCurrentXPlus());
-//	Serial.print(F("X_MINUS="));
-//	Serial.println(controller->getCurrentXMinus());
-//	Serial.print(F("Y_PLUS="));
-//	Serial.println(controller->getCurrentYPlus());
-//	Serial.print(F("Y_MINUS="));
-//	Serial.println(controller->getCurrentYMinus());
-//#endif
-
-#ifdef DEBUG
-	Serial.print(F("Scanner::start lineLength="));
-	Serial.println(lineLength);
-#endif
+  unsigned int lineSize=controller->getLineSize();
 
 	// get start time
 	startTime = millis();
 	scanning = true;
 
 	// interates over y-axis calling ctrl.nextLine() 
-	for (int i = 0; i < lineLength; i++) {
+	for (int i = 0; i < lineSize; i++) {
 
-#ifdef DEBUG
-		Serial.print(F("Scanner::start Line "));
-		Serial.println(i);
-#endif
+		scanLine(lineSize);
 
-		// scans one line (trace & re-trace)
-		scanLine();
-
-		scanning = phone->sendData(pixels, 2 * lineLength);
+		scanning = phone->sendData(pixels, 2 * lineSize);
 
 		// next line on y-axis
 		unsigned int cl = controller->nextLine();
@@ -191,6 +136,8 @@ int Scanner::stop() {
 	// calculate lapsed time
 	endTime = millis() - startTime;
 	scanning = false;
+
+  return 1;
 }
 
 // return the lapsed time

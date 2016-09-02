@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SignalSampler.h"
 
-#define DEBUG
+//#define DEBUG
 
 SignalSampler::SignalSampler(void) {
 	//TODO default values
@@ -13,7 +13,10 @@ SignalSampler::SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff
 #ifdef DEBUG
 	Serial.println(F("SignalSampler::SignalSampler"));
 #endif
+
 	this->sampleSize = sampleSize;
+    Serial.println(sampleSize);
+
 	this->sig_adc = sig_adc;
 	this->diff_adc = diff_adc;
 
@@ -40,10 +43,6 @@ int SignalSampler::readChannels()
 	// for the moment, use single sample as somewhere sampleSize is being set to 0...
 	//sampleSize = 1;
 
-#ifdef DEBUG
-	Serial.println(F("SignalSampler::readChannels"));
-	Serial.println(sizeof(float) * 7);
-#endif
 	//int aSignalValue = 0;
 	//int bSignalValue = 0;
 	//int *sumSignalValue;
@@ -61,21 +60,9 @@ int SignalSampler::readChannels()
 	// 6 - D
 	//memset(sampleMeans, 0, sizeof(float) * 7);  // -- causes issues
 	resetMeans();
-
-#ifdef DEBUG
-	Serial.print(F("SignalSampler::readChannels sampleSize="));
-	Serial.print(getSampleSize());
-	Serial.print(F(":"));
-	Serial.println((int)&(this->sampleSize));
-	//Serial.println(gSAMPLESIZE);
-#endif
-
+ 
 	//for (int i = 0; i < this->sampleSize; i++){
 
-#ifdef DEBUG
-		//Serial.print(F("Reading ADC"));
-		//Serial.println(i);
-#endif
 		// get signals
 		sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
 		sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
@@ -106,25 +93,12 @@ int SignalSampler::readChannels()
 		//sumSignalValue[j+1] = temp;
 	//}
 
-#ifdef DEBUG
-	Serial.println(F("Calculating means"));
-#endif
 
 	//// calculate means
 	//for (int i = 0; i < 7; i++)
 	//{
 	//	sampleMeans[i] = sampleMeans[i] / sampleSize;
 	//}
-
-#ifdef DEBUG
-	Serial.println(sampleMeans[0]);
-	Serial.println(sampleMeans[1]);
-	Serial.println(sampleMeans[2]);
-	Serial.println(sampleMeans[3]);
-	Serial.println(sampleMeans[4]);
-	Serial.println(sampleMeans[5]);
-	Serial.println(sampleMeans[6]);
-#endif
 
 	//median = sumSignalValue[sampleSize/2];
 	return 0;
@@ -152,6 +126,7 @@ void SignalSampler::setSampleSize(int sampleSize)
 
 void SignalSampler::resetMeans()
 {
+  
 	sampleMeans[0] = 0;
 	sampleMeans[1] = 0;
 	sampleMeans[2] = 0;

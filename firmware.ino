@@ -23,7 +23,7 @@
 //Communication parameters
 #define BAUDRATE 115200   //Serial interfaces communication speed (bps)
 
-bool reply = false;
+bool reply = true;
 
 // commands
 
@@ -33,16 +33,10 @@ bool reply = false;
 */
 bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok, String errorMessage)
 {
-#ifdef DEBUG
-	Serial.println(commandLine);
-	Serial.println(name);
-	Serial.println(commandLine.indexOf(name));
-#endif
+
 	if (commandLine.indexOf(name) == 0)
 	{
-#ifdef DEBUG
-		Serial.println("Found....");
-#endif
+
 		// setting
 		ok = false;
 		String part;
@@ -50,16 +44,11 @@ bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok,
 		while (1)
 		{
 			int pos = commandLine.indexOf(' ', pos);
-#ifdef DEBUG
-			Serial.println(pos);
-#endif
+
 			if (pos == -1) break;
 			part = commandLine.substring(pos + 1);
-
-#ifdef DEBUG
-			Serial.println(part);
-#endif
 			val = part.toInt();
+     
 			//if (val < 0) break;
 
 			ok = true;
@@ -69,10 +58,6 @@ bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok,
 		if (ok)
 		{
 			param = val;
-#ifdef DEBUG
-			Serial.println("OK");
-			Serial.println(param);
-#endif
 		}
 		else
 		{
@@ -84,18 +69,6 @@ bool CheckSingleParameter(String commandLine, String name, int &param, bool &ok,
 	return false;
 }
 
-
-int availableMemory() {
-	// Use 1024 with ATmega168
-	int size = 2048;
-	byte *buf;
-	while ((buf = (byte *)malloc(--size)) == NULL);
-	free(buf);
-	return size;
-}
-
-
-
 /* Setup */
 Adafruit_ADS1015 *sig_adc = new Adafruit_ADS1015 (0x49);   // adc with raw signal input (A, B, C and D)
 Adafruit_ADS1015 *diff_adc = new Adafruit_ADS1015(0x48);   // adc with the sum and difference signals
@@ -104,26 +77,21 @@ RTx* phone = new RTx();
 
 DAC_AD5696* vc_dac = new DAC_AD5696();   // voice coil DAC
 DAC_AD5696* pz_dac = new DAC_AD5696();   // Piezo DAC
-//DAC_AD5696* vcdac = new DAC_AD5696();
+//DAC_AD5696* vcdac = new fDAC_AD5696();
 PiezoDACController* ctrl;
 SignalSampler* sampler;
 Scanner* scanner;
 
 //This function runs once, when the arduino starts
 void setup() {
+  
 	Serial.begin(BAUDRATE);
-
-	Serial.println("setup()");
 	ctrl = new PiezoDACController(pz_dac, STEPSIZE, LINE_LENGTH, LDAC);
 	sampler = new SignalSampler(sig_adc, diff_adc, SAMPLE_SIZE);
 	scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
 
-
-
-
-	//Serial.print("Initialising I2C...");
 	unsigned char i2csetup = ADDAC::Setup(LDAC);
-	//Serial.println(i2csetup == 1 ? "success!" : "failed!");
+	Serial.println(i2csetup == 1 ? "success!" : "failed!");
 
 	vc_dac->Init(10, 1, 1);
 	pz_dac->Init(16, 0, 0);
@@ -136,7 +104,6 @@ void setup() {
 	diff_adc->begin();
 	sig_adc->begin();
 
-
 	// initialise controller
 	ctrl->Init();
 }
@@ -146,69 +113,34 @@ extern String const PARAM_LINE_LENGTH;
 //This function keeps looping
 void loop()
 {
-	Serial.println("loop()");
-	//delay(20);
-	//////pz_dac->SetOutput(15, 0xFFFF);
-	//ctrl->SetDACOutput(15, 0x0000);
-	//delay(20);
-	//ctrl->SetDACOutput(15, 0xFFFF);
-
-	//return;
-
-	//// listen for command
-	//String cmd = Serial.readStringUntil(';');
-	//if (phone->echo)
-	//{
-	//	Serial.print(cmd);
-	//	Serial.print(';');
-	//}
 
 	String cmd = phone->listen();
 
-	//delay(1);
 	int idx;
 	bool boolean;
 	uint16_t uint16;
-
-	//idx = cmd.indexOf("VCDAC::REFSET");
-	//Serial.println(idx);
 
 	 /*
 	  * Get command over serial
 	  * VCDAC::SET <x> <y>
 	  *   Set the channel <x> voltage of the piezo DAC to <y>
 	  */
+    
 	if (cmd == F("GO"))
 	{
 		scanner->start();
 	}
 	else if (cmd == F("SETUP"))
 	{
-		//delete ctrl;
-		//delete sampler;
-		//delete scanner;
 
 		int CUSTOM_STEPSIZE = Serial.parseInt();
 		int CUSTOM_LINE_LENGTH = Serial.parseInt();
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
 
-		Serial.print(F("STEP_SIZE="));
-		Serial.println(CUSTOM_STEPSIZE);
-		Serial.print(F("CUSTOM_LINE_LENGTH="));
-		Serial.println(CUSTOM_LINE_LENGTH);
-		Serial.print("CUSTOM_SAMPLE_SIZE=");
-		Serial.println(CUSTOM_SAMPLE_SIZE);
-
-		//ctrl = new PiezoDACController(pz_dac, CUSTOM_STEPSIZE, CUSTOM_LINE_LENGTH, LDAC);
-		//sampler = new SignalSampler(sig_adc, diff_adc, CUSTOM_SAMPLE_SIZE);
-		//scanner = new Scanner(ctrl, sampler, phone, CUSTOM_LINE_LENGTH);
 		ctrl->setLineSize(CUSTOM_LINE_LENGTH);
 		ctrl->setStepSize(CUSTOM_STEPSIZE);
 		sampler->setSampleSize(CUSTOM_SAMPLE_SIZE);
-	
-
-		// initialise the controller
-		//ctrl->Init();
+	  
 
 		if (reply)
 		{
@@ -218,6 +150,7 @@ void loop()
 			Serial.print(CUSTOM_LINE_LENGTH);
 			Serial.print(" CUSTOM_SAMPLE_SIZE= ");
 			Serial.println(CUSTOM_SAMPLE_SIZE);
+             Serial.write(';');
 		}
 
 	}
@@ -229,6 +162,7 @@ void loop()
 	else if (cmd == F("STARTXPLUS?"))   // startXPlus (X starting point of scan)
 	{
 		Serial.println(ctrl->startingXPlus);
+           Serial.write(';');
 	}
 	else if (CheckSingleParameter(cmd, F("STARTXPLUS"), idx, boolean, F("STARTXPLUS error")))
 	{
@@ -236,6 +170,7 @@ void loop()
 		{
 			Serial.print("Setting startingXPlus to ");
 			Serial.println(idx);
+             Serial.write(';');
 		}
 	}
 
@@ -249,6 +184,7 @@ void loop()
 		{
 			Serial.print(F("MOVEX="));
 			Serial.println(idx);
+             Serial.write(';');
 		}
 		ctrl->move(X, idx, true);
 	}
@@ -258,6 +194,7 @@ void loop()
 		{
 			Serial.print(F("MOVEY="));
 			Serial.println(idx);
+             Serial.write(';');
 		}
 		ctrl->move(Y, idx, true);
 	}
@@ -267,40 +204,29 @@ void loop()
 		{
 			Serial.print(F("MOVEZ="));
 			Serial.println(idx);
+             Serial.write(';');
 		}
 		ctrl->move(Z, idx, true);
 	}
-	//else if (CheckSingleParameter(cmd, F("CTRL::MOVE"), idx, boolean, F("CTRL::MOVEx y - x=X,Y,Z y=int")))  // move steps in the _ direction
-	//{
-	//	PIEZO_AXIS axis = X;
-	//	if (reply)
-	//	{
-	//		// what channel
-	//		if (cmd[10] == 'X') axis = X;
-	//		if (cmd[10] == 'Y') axis = Y;
-	//		if (cmd[10] == 'Z') axis = Z;
-	//		Serial.print(F("MOVE"));
-	//		Serial.print(axis);
-	//		Serial.print(F("="));
-	//		Serial.println(idx);
-	//	}
-	//	ctrl->move(axis, idx, true);
-	//}
 
 	////////////////
 	//// LINE LENGTH
 	////////////////
+  
 	else if (cmd == F("LINELENGTH?"))
-	{
-		//Serial.print("LineLength is ");
+	{ 
+	  Serial.print(F("LINELENGTH:"));
 		Serial.println(ctrl->getLineSize());
+           Serial.write(';');
+    
 	}
 	else if (CheckSingleParameter(cmd, F("LINELENGTH"), idx, boolean, F("LINELENGTH y - where y is integer to set.")))
 	{
 		if (reply)
 		{
-			Serial.print(F("LINELENGTH="));
+			Serial.print(F("LINELENGTH SET="));
 			Serial.println(idx);
+             Serial.write(';');
 		}
 		ctrl->setLineSize(idx);
 	}
@@ -310,8 +236,9 @@ void loop()
 	//////////////
 	else if (cmd == F("STEPSIZE?"))  // get step size
 	{
-		//Serial.print("LineLength is ");
+		Serial.print(F("STEPSIZE:"));
 		Serial.println(ctrl->getStepSize());
+           Serial.write(';');
 	}
 	else if (CheckSingleParameter(cmd, F("STEPSIZE"), idx, boolean, F("STEPSIZE - Invalid command syntax!")))
 	{

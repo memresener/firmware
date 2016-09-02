@@ -22,14 +22,11 @@
 
 class SignalSampler
 {
-	protected:
-
 	private: 
 		void resetMeans();
 		Adafruit_ADS1015 *sig_adc;
 		Adafruit_ADS1015 *diff_adc;
 
-		int sampleSize;
 
 		// 0 - A minus B
 		// 1 - C minus D
@@ -38,9 +35,11 @@ class SignalSampler
 		// 4 - B
 		// 5 - C
 		// 6 - D
-		float *sampleMeans;
+		float* sampleMeans;
 
 	public:
+     unsigned int sampleSize=2;
+
 		SignalSampler(void);
 		SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff_adc, int);
 		~SignalSampler();
