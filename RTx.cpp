@@ -31,7 +31,7 @@ int RTx::sendData(int pixels[], int pixelCount) {
 			Serial.print(','); // Send ',' when a number is sent
 		}
 	}
-	Serial.flush();
+	//Serial.flush();
 
 	if (cmd == "DONE") return 0;
 

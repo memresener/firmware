@@ -289,6 +289,11 @@ void PiezoDACController::SetAsOrigin() {
 
 // move to beginning of next line.
 unsigned int PiezoDACController::nextLine() {
+
+#ifdef DEBUG
+Serial.print("Moving to next Line");
+Serial.println(currentY);
+#endif
 	//int delta = (((currentStep / lineSize) + 1) * lineSize) - currentStep;
 	//currentStep += delta;
 	//setCoordinates();
@@ -342,7 +347,7 @@ unsigned int PiezoDACController::increaseVoltage() {
   //setCoordinates();
   
   //move(X, stepSize, false);
-	GotoCoordinates(currentX + 1, currentZ, currentZ);
+	GotoCoordinates(currentX + 1, currentY, currentZ);
   //go(CHANNEL_A, currentX);
   //go(CHANNEL_B, currentY);
   
@@ -366,7 +371,7 @@ unsigned int PiezoDACController::decreaseVoltage()
 
   //setCoordinates();
 
-	GotoCoordinates(currentX - 1, currentZ, currentZ);
+	GotoCoordinates(currentX - 1, currentY, currentZ);
   //go(CHANNEL_A, currentX);
   //go(CHANNEL_B, currentY);
 

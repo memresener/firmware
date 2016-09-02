@@ -97,14 +97,11 @@ int Scanner::start() {
 
 	// interates over y-axis calling ctrl.nextLine() 
 	for (int i = 0; i < lineSize; i++) {
-
+    
 		scanLine(lineSize);
-
 		scanning = phone->sendData(pixels, 2 * lineSize);
-
-		// next line on y-axis
 		unsigned int cl = controller->nextLine();
-
+   
 		if (scanning == false) {
 			break;
 		}
