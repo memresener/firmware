@@ -111,7 +111,8 @@ public:
 	// destructor
 	~PiezoDACController();
 	
-	void Init();
+	void Init(uint16_t xoffset, uint16_t yoffset);
+  void Init();
 
 	// reset parameters
 	unsigned int reset(int, int, int);

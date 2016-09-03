@@ -51,8 +51,8 @@ private:
 	// end time at Scanner.stop() or when the scanning finished.
 	unsigned long endTime;
 
-	// the length of the line (number of pixels)
-	int lineLength;
+	// the length of the line scanned
+	uint16_t lineLength;
 	// pointer to the pixel array
 	int *pixels;
 	// indicates if scanning is in progress.
@@ -84,7 +84,7 @@ public:
 	int stream();
 
 	// update a param value
-	void setParam(String param, String value);
+	void setLineLength(int value);
 
 	// get lapsed time
 	unsigned long getLapsedTime();

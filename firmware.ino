@@ -91,7 +91,7 @@ void setup() {
 	scanner = new Scanner(ctrl, sampler, phone, LINE_LENGTH);
 
 	unsigned char i2csetup = ADDAC::Setup(LDAC);
-	Serial.println(i2csetup == 1 ? "success!" : "failed!");
+	Serial.println(i2csetup == 1 ? "success!;" : "failed!;");
 
 	vc_dac->Init(10, 1, 1);
 	pz_dac->Init(16, 0, 0);
@@ -134,20 +134,26 @@ void loop()
 	{
 
 		int CUSTOM_STEPSIZE = Serial.parseInt();
-		int CUSTOM_LINE_LENGTH = Serial.parseInt();
+		int CUSTOM_XLINE_LENGTH = Serial.parseInt();
+    int CUSTOM_YLINE_LENGTH = Serial.parseInt();
 		int CUSTOM_SAMPLE_SIZE = Serial.parseInt();
-
-		ctrl->setLineSize(CUSTOM_LINE_LENGTH);
+    int X_OFFSET = Serial.parseInt();
+    int Y_OFFSET = Serial.parseInt();
+    
+		ctrl->setLineSize(CUSTOM_XLINE_LENGTH);
 		ctrl->setStepSize(CUSTOM_STEPSIZE);
+    ctrl->Init(X_OFFSET, Y_OFFSET);
 		sampler->setSampleSize(CUSTOM_SAMPLE_SIZE);
-	  
-
+	  scanner->setLineLength(CUSTOM_YLINE_LENGTH);
+    
 		if (reply)
 		{
 			Serial.print(F("Setup with STEP_SIZE= "));
 			Serial.print(CUSTOM_STEPSIZE);
-			Serial.print(F(", CUSTOM_LINE_LENGTH= "));
-			Serial.print(CUSTOM_LINE_LENGTH);
+			Serial.print(F(", CUSTOM_XLINE_LENGTH= "));
+			Serial.print(CUSTOM_XLINE_LENGTH);
+      Serial.print(F(", CUSTOM_YLINE_LENGTH= "));
+      Serial.print(CUSTOM_YLINE_LENGTH);
 			Serial.print(" CUSTOM_SAMPLE_SIZE= ");
 			Serial.println(CUSTOM_SAMPLE_SIZE);
              Serial.write(';');
