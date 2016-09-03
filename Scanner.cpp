@@ -10,7 +10,7 @@
 // Constructor
 Scanner::Scanner(PiezoDACController *controll, SignalSampler *sample, const RTx *phon, const int lineLeng)
 {
-	this->pixels = new int[lineLength * 2];
+	this->pixels = new int[1];
 	this->controller = controll;
 	this->startTime = 0;
 	this->endTime = 0;
