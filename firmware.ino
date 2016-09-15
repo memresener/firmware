@@ -94,12 +94,12 @@ void setup() {
 	unsigned char i2csetup = ADDAC::Setup(LDAC);
 	Serial.println(i2csetup == 1 ? "success!" : "failed!");
 
-	vc_dac->Init(10, 1, 1);
-	pz_dac->Init(16, 0, 0);
+	vc_dac->Init(16, 1, 1);
+	pz_dac->Init(16, 0, 0);  // (0, 0)
 
 	// turn internal reference off
-	vc_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
-	pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
+	//vc_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
+	//pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
 
 	// start ADCs
 	diff_adc->begin();
@@ -315,21 +315,21 @@ void loop()
 	{
 		Serial.println(F("PONG"));
 	}
-	else if (CheckSingleParameter(cmd, F("REPLY"), idx, bl, F("REPLY - Invalid syntax!")))   // reply?
+	else if (CheckSingleParameter(cmd, F("REPLY"), idx, bl, F("REPLY x; where x = 0 or 1.")))   // reply?
 	{
 		reply = idx == 1;
 		if (reply)
 		{
-			Serial.print("RPL=");
+			Serial.print(F("REPLY="));
 			Serial.println(reply ? 1 : 0);
 		}
 	}
-	else if (CheckSingleParameter(cmd, "ECHO", idx, bl, "ECHO!"))  // echo back?
+	else if (CheckSingleParameter(cmd, F("ECHO"), idx, bl, F("ECHO x; where x = 0 or 1.")))  // echo back?
 	{
 		phone->echo = idx == 1;
 		if (reply)
 		{
-			Serial.print("ECHO=");
+			Serial.print(F("ECHO="));
 			Serial.println(phone->echo ? 1 : 0);
 		}
 	}
@@ -361,16 +361,16 @@ void loop()
 	}
 
 	// read single channel from diff
-	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, "DIFFADC::GET - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, F("DIFFADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
 		if (idx >=0 && idx <= 3)
 		{
 			uint16 = diff_adc->readADC_SingleEnded(idx);
 			if (reply)
 			{
-				Serial.print("Channel ");
-				Serial.print(idx - 1);
-				Serial.print(" is ");
+				Serial.print(F("Channel "));
+				Serial.print(idx);
+				Serial.print(F(" is "));
 				Serial.println(idx);
 			}
 			Serial.println(uint16);
@@ -381,16 +381,16 @@ void loop()
 	}
 
 	// read single channel from sig
-	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, bl, F("SIGADC::GET y - y is int (channel)!")))
+	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, bl, F("SIGADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
 		if (idx >=0 && idx <= 3)
 		{
 			uint16 = sig_adc->readADC_SingleEnded(idx);
 			if (reply)
 			{
-				Serial.print("Channel ");
-				Serial.print(idx - 1);
-				Serial.print(" is ");
+				Serial.print(F("Channel "));
+				Serial.print(idx);
+				Serial.print(F(" is "));
 				Serial.println(idx);
 			}
 			Serial.println(uint16);
@@ -551,12 +551,12 @@ void loop()
 		Serial.print("Bits = ");
 		Serial.println(vc_dac->getBits());
 	}
-	else if (cmd == "VCDAC:RST")
+	else if (cmd == F("VCDAC::RST"))
 	{
 		vc_dac->Reset(AD569X_RST_MIDSCALE);
-		if (reply) Serial.println("Resetting Piezo DAC");
+		if (reply) Serial.println(F("Resetting Piezo DAC"));
 	}
-	else if (CheckSingleParameter(cmd, "VCDAC::RFST", idx, bl, "VCDAC::RFST!"))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, F("VCDAC::RFST"), idx, bl, F("VCDAC::RFST!")))  // set the internal reference state
 	{
 		if (reply)
 		{
