@@ -28,6 +28,7 @@ bool reply = true;
 // commands
 
 /*!
+ * 
 	Check <commandLine> for something of the form "<name> <number>"
 	If it is found, extract the <numer> and put it in <param>, and return true
 */
@@ -117,7 +118,7 @@ void loop()
 	String cmd = phone->listen();
 
 	int idx;
-	bool boolean;
+	bool bl;
 	uint16_t uint16;
 
 	 /*
@@ -164,7 +165,7 @@ void loop()
 		Serial.println(ctrl->startingXPlus);
            Serial.write(';');
 	}
-	else if (CheckSingleParameter(cmd, F("STARTXPLUS"), idx, boolean, F("STARTXPLUS error")))
+	else if (CheckSingleParameter(cmd, F("STARTXPLUS"), idx, bl, F("STARTXPLUS error")))
 	{
 		if (reply)
 		{
@@ -178,7 +179,7 @@ void loop()
 #ifdef CTRL_
 
 
-	else if (CheckSingleParameter(cmd, F("CTRL::MOVEX"), idx, boolean, F("CTRL::MOVEX y y=int")))  // move steps in the X direction
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEX"), idx, bl, F("CTRL::MOVEX y y=int")))  // move steps in the X direction
 	{
 		if (reply)
 		{
@@ -188,7 +189,7 @@ void loop()
 		}
 		ctrl->move(X, idx, true);
 	}
-	else if (CheckSingleParameter(cmd, F("CTRL::MOVEY"), idx, boolean, F("CTRL::MOVEY y y=int")))  // move steps in the X direction
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEY"), idx, bl, F("CTRL::MOVEY y y=int")))  // move steps in the X direction
 	{
 		if (reply)
 		{
@@ -198,7 +199,7 @@ void loop()
 		}
 		ctrl->move(Y, idx, true);
 	}
-	else if (CheckSingleParameter(cmd, F("CTRL::MOVEZ"), idx, boolean, F("CTRL::MOVEZ y y=int")))  // move steps in the X direction
+	else if (CheckSingleParameter(cmd, F("CTRL::MOVEZ"), idx, bl, F("CTRL::MOVEZ y y=int")))  // move steps in the X direction
 	{
 		if (reply)
 		{
@@ -220,7 +221,7 @@ void loop()
            Serial.write(';');
     
 	}
-	else if (CheckSingleParameter(cmd, F("LINELENGTH"), idx, boolean, F("LINELENGTH y - where y is integer to set.")))
+	else if (CheckSingleParameter(cmd, F("LINELENGTH"), idx, bl, F("LINELENGTH y - where y is integer to set.")))
 	{
 		if (reply)
 		{
@@ -240,7 +241,7 @@ void loop()
 		Serial.println(ctrl->getStepSize());
            Serial.write(';');
 	}
-	else if (CheckSingleParameter(cmd, F("STEPSIZE"), idx, boolean, F("STEPSIZE - Invalid command syntax!")))
+	else if (CheckSingleParameter(cmd, F("STEPSIZE"), idx, bl, F("STEPSIZE - Invalid command syntax!")))
 	{
 		if (reply)
 		{
@@ -257,7 +258,7 @@ void loop()
 		//Serial.print("LineLength is ");
 		Serial.println(scanner->getScanDelay());
 	}
-	else if (CheckSingleParameter(cmd, F("SCANDELAY"), idx, boolean, F("SCANDELAY - Invalid command syntax!")))  // set scan delay in micros
+	else if (CheckSingleParameter(cmd, F("SCANDELAY"), idx, bl, F("SCANDELAY - Invalid command syntax!")))  // set scan delay in micros
 	{
 		if (idx >= 0)
 		{
@@ -289,7 +290,7 @@ void loop()
 		//Serial.println(sampler->sampleSize);
 		//Serial.println(gSAMPLESIZE);
 	}
-	else if (CheckSingleParameter(cmd, F("SAMPLESIZE"), idx, boolean, F("SAMPLESIZE - Invalid command syntax!")))   // set the sample size
+	else if (CheckSingleParameter(cmd, F("SAMPLESIZE"), idx, bl, F("SAMPLESIZE - Invalid command syntax!")))   // set the sample size
 	{
 		sampler->setSampleSize(idx);
 		//sampler->sampleSize = idx;
@@ -314,7 +315,7 @@ void loop()
 	{
 		Serial.println(F("PONG"));
 	}
-	else if (CheckSingleParameter(cmd, F("REPLY"), idx, boolean, F("REPLY - Invalid syntax!")))   // reply?
+	else if (CheckSingleParameter(cmd, F("REPLY"), idx, bl, F("REPLY - Invalid syntax!")))   // reply?
 	{
 		reply = idx == 1;
 		if (reply)
@@ -323,7 +324,7 @@ void loop()
 			Serial.println(reply ? 1 : 0);
 		}
 	}
-	else if (CheckSingleParameter(cmd, "ECHO", idx, boolean, "ECHO!"))  // echo back?
+	else if (CheckSingleParameter(cmd, "ECHO", idx, bl, "ECHO!"))  // echo back?
 	{
 		phone->echo = idx == 1;
 		if (reply)
@@ -360,9 +361,9 @@ void loop()
 	}
 
 	// read single channel from diff
-	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, boolean, "DIFFADC::GET - Invalid command syntax!"))
+	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, "DIFFADC::GET - Invalid command syntax!"))
 	{
-		if (idx < 0 || idx > 3)
+		if (idx >=1 && idx <= 3)
 		{
 			uint16 = diff_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
@@ -380,9 +381,9 @@ void loop()
 	}
 
 	// read single channel from sig
-	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, boolean, F("SIGADC::GET y - y is int (channel)!")))
+	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, bl, F("SIGADC::GET y - y is int (channel)!")))
 	{
-		if (idx < 0 || idx > 3)
+		if (idx >=1 && idx <= 3)
 		{
 			uint16 = sig_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
@@ -401,7 +402,7 @@ void loop()
 	}
 
 	// set gain
-	else if (CheckSingleParameter(cmd, F("DIFFADC::GAIN"), idx, boolean, F("DIFFADC::GAIN - Invalid command syntax!")))
+	else if (CheckSingleParameter(cmd, F("DIFFADC::GAIN"), idx, bl, F("DIFFADC::GAIN - Invalid command syntax!")))
 	{
 		if (idx >= 0 && idx <= 5)
 		{
@@ -444,7 +445,7 @@ void loop()
 
 
 	// set gain
-	else if (CheckSingleParameter(cmd, F("SIGADC::GAIN"), idx, boolean, F("SIGADC::GET - Invalid command syntax!")))
+	else if (CheckSingleParameter(cmd, F("SIGADC::GAIN"), idx, bl, F("SIGADC::GET - Invalid command syntax!")))
 	{
 		if (idx >= 0 && idx <= 5)
 		{
@@ -516,10 +517,10 @@ void loop()
 			Serial.println(")");
 		}
 	}
-	else if (CheckSingleParameter(cmd, "POS?", idx, boolean, "POS?!"))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, "POS?", idx, bl, "POS?!"))  // set the internal reference state
 	{
 		Serial.println(idx);
-		if (idx >= 1 && idx <= 3 && boolean)
+		if (idx >= 1 && idx <= 3 && bl)
 		{
 			if (reply)
 			{
@@ -555,7 +556,7 @@ void loop()
 		vc_dac->Reset(AD569X_RST_MIDSCALE);
 		if (reply) Serial.println("Resetting Piezo DAC");
 	}
-	else if (CheckSingleParameter(cmd, "VCDAC::RFST", idx, boolean, "VCDAC::RFST!"))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, "VCDAC::RFST", idx, bl, "VCDAC::RFST!"))  // set the internal reference state
 	{
 		if (reply)
 		{
@@ -579,7 +580,7 @@ void loop()
 			String valuePart;
 			int channel;
 			float value;
-			boolean = cmd[0] == 'V';  // if cmd[0] is V, it must be VCDAC...
+			bl = cmd[0] == 'V';  // if cmd[0] is V, it must be VCDAC...
 			while (1)
 			{
 				String *parts;
@@ -622,7 +623,7 @@ void loop()
 					Serial.print("Setting channel mask ");
 					Serial.print(channel);
 					Serial.print(" of ");
-					Serial.print(boolean ? "VCDAC" : "PZDAC");
+					Serial.print(bl ? "VCDAC" : "PZDAC");
 					Serial.print(" to ");
 					Serial.println(value);
 				}
@@ -633,7 +634,7 @@ void loop()
 				//rnd *= rand;
 
 				// which dac?
-				if (boolean)
+				if (bl)
 				{
 					vc_dac->SetVoltage(channel, value, 5.0f);
 				} else 
