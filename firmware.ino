@@ -99,7 +99,7 @@ void setup() {
 
 	// turn internal reference off
 	//vc_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
-	//pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
+	pz_dac->InternalVoltageReference(AD569X_INT_REF_OFF);
 
 	// start ADCs
 	diff_adc->begin();
