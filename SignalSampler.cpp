@@ -66,11 +66,11 @@ int SignalSampler::readChannels()
 		// get signals
 		sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
 		sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
-		//sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
-		//sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
-		//sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
-		//sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
-		//sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
+		sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
+		sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
+		sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
+		sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
+		sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
 
 
 //#ifdef DEBUG

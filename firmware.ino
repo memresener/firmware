@@ -363,7 +363,7 @@ void loop()
 	// read single channel from diff
 	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, "DIFFADC::GET - Invalid command syntax!"))
 	{
-		if (idx >=1 && idx <= 3)
+		if (idx >=0 && idx <= 3)
 		{
 			uint16 = diff_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
@@ -383,7 +383,7 @@ void loop()
 	// read single channel from sig
 	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, bl, F("SIGADC::GET y - y is int (channel)!")))
 	{
-		if (idx >=1 && idx <= 3)
+		if (idx >=0 && idx <= 3)
 		{
 			uint16 = sig_adc->readADC_SingleEnded(idx - 1);
 			if (reply)
