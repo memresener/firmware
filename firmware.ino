@@ -365,7 +365,7 @@ void loop()
 	{
 		if (idx >=0 && idx <= 3)
 		{
-			uint16 = diff_adc->readADC_SingleEnded(idx - 1);
+			uint16 = diff_adc->readADC_SingleEnded(idx);
 			if (reply)
 			{
 				Serial.print("Channel ");
@@ -385,7 +385,7 @@ void loop()
 	{
 		if (idx >=0 && idx <= 3)
 		{
-			uint16 = sig_adc->readADC_SingleEnded(idx - 1);
+			uint16 = sig_adc->readADC_SingleEnded(idx);
 			if (reply)
 			{
 				Serial.print("Channel ");
