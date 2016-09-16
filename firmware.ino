@@ -315,6 +315,14 @@ void loop()
 	{
 		Serial.println(F("PONG"));
 	}
+  else if (cmd == F("REPLY?"))
+  {
+    if (reply)
+    {
+      Serial.print(F("REPLY="));
+    }
+    Serial.println(reply ? F("1") : F("0"));
+  }
 	else if (CheckSingleParameter(cmd, F("REPLY"), idx, bl, F("REPLY x; where x = 0 or 1.")))   // reply?
 	{
 		reply = idx == 1;
@@ -324,6 +332,14 @@ void loop()
 			Serial.println(reply ? 1 : 0);
 		}
 	}
+  else if (cmd == F("ECHO?"))
+  {
+    if (reply)
+    {
+      Serial.print(F("ECHO="));
+    }
+    Serial.println(phone->echo);
+  }
 	else if (CheckSingleParameter(cmd, F("ECHO"), idx, bl, F("ECHO x; where x = 0 or 1.")))  // echo back?
 	{
 		phone->echo = idx == 1;
