@@ -572,7 +572,7 @@ void loop()
 		vc_dac->Reset(AD569X_RST_MIDSCALE);
 		if (reply) Serial.println(F("Resetting Piezo DAC"));
 	}
-	else if (CheckSingleParameter(cmd, F("VCDAC::RFST"), idx, bl, F("VCDAC::RFST!")))  // set the internal reference state
+	else if (CheckSingleParameter(cmd, F("VCDAC::RFST"), idx, bl, F("VCDAC::RFST x; where x is 0 or 1")))  // set the internal reference state
 	{
 		if (reply)
 		{
@@ -581,7 +581,15 @@ void loop()
 		}
 		vc_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
 	}
-
+  else if (CheckSingleParameter(cmd, F("PZDAC::RFST"), idx, bl, F("PZDAC::RFST x; where x is 0 or 1")))  // set the internal reference state
+  {
+    if (reply)
+    {
+      Serial.print("IntRef=");
+      Serial.println(idx);
+    }
+    pz_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
+  }
 	else
 	{
 		//////////////////////////////////////////////////////
