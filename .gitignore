@@ -10,3 +10,5 @@ l2n_*
 l2n_firmware.ino
 __vm/
 Debug/
+
+.DS_Store
