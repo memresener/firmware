@@ -37,10 +37,21 @@ PiezoDACController::PiezoDACController(ADDAC *dac, int stepSize, int lineLength,
 // destructor.
 PiezoDACController::~PiezoDACController() {}
 
-void PiezoDACController::Init()
+void PiezoDACController::Init(){
+  SetDACOutput(B1111, (uint16_t)44308);
+}
+
+void PiezoDACController::Init(uint16_t xoffset, uint16_t yoffset)
 {
-	// should start with DACs at mid range
-	SetDACOutput(B1111, (uint16_t)44308);
+  startingXPlus = xoffset;
+  startingYPlus = xoffset;
+  startingXMinus = yoffset;
+  startingYMinus = yoffset;
+  
+	// should start with DACs at given range
+	SetDACOutput(B0101, (uint16_t)xoffset);
+  SetDACOutput(B1010, (uint16_t)yoffset);
+  SetAsOrigin();
 }
 
 // reset parameters
@@ -53,8 +64,7 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
   this->currentY = 0;
   this->currentZ = 0;
 
-  // should start with DACs at mid range
-  //SetDACOutput(AD569X_ADDR_DAC_ALL, (uint16_t)0x7FFF);
+  
   //SetDACOutput(B1111, (uint16_t)44308);  // on the currnt piezo board this gives 0 output
   //GotoCoordinates(0, 0, 0);
 
@@ -68,6 +78,12 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 /*! Set the DAC output and update internal position. */
 int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 {
+
+  /*Serial.print("Setting output of channel:");
+  Serial.print(channels);
+  Serial.print("to");
+  Serial.println(value);*/
+  
 	dac->SetOutput(channels, value);
   
 	if (channels & X_PLUS)
@@ -90,21 +106,6 @@ int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
 		currentYMinus = value;
 	}
 
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::GotoCoordinates X_PLUS="));
-	Serial.println(currentXPlus);
-	Serial.flush();
-	Serial.print(F("PiezoDACController::GotoCoordinates X_MINUS="));
-	Serial.println(currentXMinus);
-	Serial.flush();
-	Serial.print(F("PiezoDACController::GotoCoordinates Y_PLUS="));
-	Serial.println(currentYPlus);
-	Serial.flush();
-	Serial.print(F("PiezoDACController::GotoCoordinates Y_MINUS="));
-	Serial.println(currentYMinus);
-	Serial.flush();
-#endif
-
 	return 0;
 }
 
@@ -123,33 +124,13 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 	uint16_t currentMinus = 0;
 	bool doSingle = true;
 
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::GotoCoordinates Current X is "));
-	Serial.println(currentX);
-	Serial.print(F("PiezoDACController::GotoCoordinates Current Y is "));
-	Serial.println(currentY);
-	Serial.print(F("PiezoDACController::GotoCoordinates Current Z is "));
-	Serial.println(currentZ);
-#endif
-
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::GotoCoordinates X_PLUS="));
-	Serial.println(currentXPlus);
-	Serial.print(F("PiezoDACController::GotoCoordinates X_MINUS="));
-	Serial.println(currentXMinus);
-	Serial.print(F("PiezoDACController::GotoCoordinates Y_PLUS="));
-	Serial.println(currentYPlus);
-	Serial.print(F("PiezoDACController::GotoCoordinates Y_MINUS="));
-	Serial.println(currentYMinus);
-#endif
-
 	// Decide what to move where
   
 	switch (direction)
 	{
 		// for Z up/down, increment/decrement all dac channels
 	case Z:
-		//currentZ--;
+
 		//diff = direction == Z_UP ? adiff : -adiff;  // increase or decrease?
 
 		for (int i = 0; i < lim; i++)
@@ -184,19 +165,6 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 	}
 
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::GotoCoordinates Current Plus is "));
-	Serial.println(currentPlus);
-	Serial.print(F("PiezoDACController::GotoCoordinates Current Minus is "));
-	Serial.println(currentMinus);
-
-	Serial.print(F("PiezoDACController::GotoCoordinates Moving channel "));
-	Serial.print(channelPlus);
-	Serial.print(F(" and "));
-	Serial.print(channelMinus);
-	Serial.print(F(" by "));
-	Serial.println(diff);
-#endif
 
 	// change DAC
 	if (doSingle)
@@ -227,43 +195,26 @@ int PiezoDACController::GotoCoordinates(int x, int y, int z)
 
 	if (diffX != 0)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Moving X by "));
-		Serial.println(diffX);
-#endif
+
 		move(X, diffX, true);
 	}
 
 	if (diffY != 0)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Moving Y by "));
-		Serial.println(diffY);
-#endif
+
 		move(Y, diffY, true);
 
 	}
 
 	if (diffZ != 0)
 	{
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GotoCoordinates Moving Z by "));
-		Serial.println(diffZ);
-#endif
+
 		move(Z, diffZ, true);
 	}
 
 	currentX = x;
 	currentY = y;
 	currentZ = z;
-
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::GotoCoordinates Current position is ("));
-	Serial.print(x);
-	Serial.print(", ");
-	Serial.print(y);
-	Serial.println(")");
-#endif
 
 	return 0;
 }
@@ -289,6 +240,7 @@ void PiezoDACController::SetAsOrigin() {
 
 // move to beginning of next line.
 unsigned int PiezoDACController::nextLine() {
+
 	//int delta = (((currentStep / lineSize) + 1) * lineSize) - currentStep;
 	//currentStep += delta;
 	//setCoordinates();
@@ -325,24 +277,13 @@ unsigned int PiezoDACController::eol() {
 // increase voltage
 unsigned int PiezoDACController::increaseVoltage() {
 
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::increaseVoltage stepSize="));
-	Serial.print(stepSize);
-	Serial.print(F(":"));
-	Serial.println((int)&(this->stepSize));
-	Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage X_PLUS="));	Serial.println(currentXPlus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage X_MINUS=")); Serial.println(currentXMinus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage Y_PLUS="));	Serial.println(currentYPlus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage Y_MINUS=")); Serial.println(currentYMinus); Serial.flush();
-#endif
   // step fwd
   //currentStep += stepSize;
   
   //setCoordinates();
   
   //move(X, stepSize, false);
-	GotoCoordinates(currentX + 1, currentZ, currentZ);
+	GotoCoordinates(currentX + 1, currentY, currentZ);
   //go(CHANNEL_A, currentX);
   //go(CHANNEL_B, currentY);
   
@@ -353,20 +294,12 @@ unsigned int PiezoDACController::increaseVoltage() {
 unsigned int PiezoDACController::decreaseVoltage() 
 {
 
-
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::increaseVoltage stepSize=")); Serial.println(stepSize); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage X_PLUS="));	Serial.println(currentXPlus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage X_MINUS=")); Serial.println(currentXMinus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage Y_PLUS="));	Serial.println(currentYPlus); Serial.flush();
-	Serial.print(F("PiezoDACController::increaseVoltage Y_MINUS=")); Serial.println(currentYMinus); Serial.flush();
-#endif
   // step back
   //currentStep -= stepSize;
 
   //setCoordinates();
 
-	GotoCoordinates(currentX - 1, currentZ, currentZ);
+	GotoCoordinates(currentX - 1, currentY, currentZ);
   //go(CHANNEL_A, currentX);
   //go(CHANNEL_B, currentY);
 
@@ -381,12 +314,6 @@ int PiezoDACController::getLineSize() {
 void PiezoDACController::setLineSize(int lineSize)
 {
 	this->lineSize = lineSize;
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::setLineSize lineSize="));
-	Serial.print(this->lineSize);
-	Serial.print(F(":"));
-	Serial.println((int)&(this->lineSize));
-#endif
 }
 
 // get the position
@@ -395,21 +322,12 @@ int PiezoDACController::GetPosition(PIEZO_AXIS axis)
 	switch (axis)
 	{
 	case X:
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GetPosition Getting position of axis X"));
-#endif
 		return currentX;
 		break;
 	case Y:
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GetPosition Getting position of axis Y"));
-#endif
 		return currentY;
 		break;
 	case Z:
-#ifdef DEBUG
-		Serial.print(F("PiezoDACController::GetPosition Getting position of axis Z"));
-#endif
 		return currentZ;
 		break;
 	}
@@ -418,12 +336,7 @@ int PiezoDACController::GetPosition(PIEZO_AXIS axis)
 void PiezoDACController::setStepSize(int stepSize)
 {
 	this->stepSize = stepSize;
-#ifdef DEBUG
-	Serial.print(F("PiezoDACController::setStepSize stepSize="));
-	Serial.print(this->stepSize);
-	Serial.print(F(":"));
-	Serial.println((int)&(this->stepSize));
-#endif
+
 }
 
 void PiezoDACController::invert() {

@@ -10,7 +10,7 @@
 // Constructor
 Scanner::Scanner(PiezoDACController *controll, SignalSampler *sample, const RTx *phon, const int lineLeng)
 {
-	this->pixels = new int[lineLength * 2];
+	this->pixels = new int[1];
 	this->controller = controll;
 	this->startTime = 0;
 	this->endTime = 0;
@@ -44,17 +44,20 @@ void Scanner::reset()
 // Does a trace and retrace. The retrace data will be in backward order.
 int Scanner::scanLine(unsigned int lineSize) {
   
-	unsigned int x = 0;
-	//trace
-	for (int i = 0; i < lineSize; i++) {
+	uint16_t x = 0;
+	int stepSize =controller->getStepSize();
+  uint16_t idx_MAX=lineSize/stepSize;
+  
+	for (int i = 0; i < idx_MAX; i++) {
 
 		sampler->readChannels();
 
 		// calculate and save FES
-		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
-		x++;
+		pixels[0] = sampler->getAMinusB() - sampler->getCMinusD();
+		Serial.print(pixels[0]);
+    Serial.write(',');
 
-		if (i + 1 < lineSize)
+		if (i + 1 < idx_MAX)
 		{
 			controller->increaseVoltage();
 		}
@@ -63,22 +66,22 @@ int Scanner::scanLine(unsigned int lineSize) {
 	}
 
 	//retrace
-	for (int i = 0; i < lineSize; i++) {
+	for (int i = 0; i < idx_MAX; i++) {
 
 		sampler->readChannels();
 
 		// calculate and save FES
 		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
-		x++;
+		Serial.print(pixels[0]);
 
-		if (i + 1 < lineSize)
+		if (i + 1 < idx_MAX)
 		{
+      Serial.write(',');
 			controller->decreaseVoltage();
 		}
 
 		if (scanDelay > 0) delay(scanDelay);
 	}
-
 	linesScanned++;
 
 
@@ -89,22 +92,19 @@ int Scanner::scanLine(unsigned int lineSize) {
 int Scanner::start() {
 
 
-  unsigned int lineSize=controller->getLineSize();
+  unsigned int xlineSize=controller->getLineSize();
 
 	// get start time
 	startTime = millis();
 	scanning = true;
 
 	// interates over y-axis calling ctrl.nextLine() 
-	for (int i = 0; i < lineSize; i++) {
-
-		scanLine(lineSize);
-
-		scanning = phone->sendData(pixels, 2 * lineSize);
-
-		// next line on y-axis
+	for (int i = 0; i < lineLength; i++) {
+    
+		scanLine(xlineSize);
+		scanning = phone->sendString(";");
 		unsigned int cl = controller->nextLine();
-
+   
 		if (scanning == false) {
 			break;
 		}
@@ -148,12 +148,10 @@ unsigned long Scanner::getLapsedTime() {
 
 extern String const PARAM_LINE_LENGTH = "LINELENGTH";
 
-void Scanner::setParam(String param, String value) {
+void Scanner::setLineLength(int value) {
 	stop();
-
-	if (PARAM_LINE_LENGTH == param) {
-		lineLength = atoi(value.c_str());
-	}
+ 
+  lineLength = value;
 
 }
 

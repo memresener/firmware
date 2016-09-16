@@ -31,7 +31,7 @@ int RTx::sendData(int pixels[], int pixelCount) {
 			Serial.print(','); // Send ',' when a number is sent
 		}
 	}
-	Serial.flush();
+	//Serial.flush();
 
 	if (cmd == "DONE") return 0;
 
@@ -39,8 +39,11 @@ int RTx::sendData(int pixels[], int pixelCount) {
 }
 
 //only send message if other side is ready for it
-void RTx::sendString(String message) {
+int RTx::sendString(String message) {
 	String cmd;
+ 
+  Serial.print(message);
+  
 	while (true) {
 		cmd = listen();
 		if (cmd == "RDY")
@@ -52,9 +55,13 @@ void RTx::sendString(String message) {
 			break;
 		}
 	}
-	Serial.print(message);
-	Serial.println(';'); // Send ';' when all numbers are sent
+
+    if (cmd == "DONE") return 0;
+
+  else return 1;
 }
+
+
 
 
 String RTx::listen() {
