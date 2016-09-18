@@ -376,6 +376,19 @@ void loop()
 		Serial.println(sampler->getD());
 	}
 
+  else if (cmd == F("SIG::FES?"))
+  {
+    int a = sampler->getA();
+    int b = sampler->getB();
+    int c = sampler->getC();
+    int d = sampler->getD();
+    int fes = (a+c) - (b+d);
+    if (reply)
+    {
+      Serial.print(F("FES="));
+    }
+    Serial.println(fes);
+  }
 	// read single channel from diff
 	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, F("DIFFADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
@@ -604,7 +617,9 @@ void loop()
 			String valuePart;
 			int channel;
 			float value;
+      uint16_t valuei;
 			bl = cmd[0] == 'V';  // if cmd[0] is V, it must be VCDAC...
+      bool setv = cmd.indexOf("DAC::SETV") >= 0;  // set using the actual DAC value?
 			while (1)
 			{
 				String *parts;
@@ -620,21 +635,34 @@ void loop()
 				// check range
 				if (channel < 0 || channel > 15)
 				{
-					if (reply) Serial.println("Channel number must be a bit mask of 4 bits (0 to 15)");
+					if (reply) Serial.println(F("Channel number must be a bit mask of 4 bits (0 to 15)"));
 					break;
 				}
 
 				// extract value
 				pos = pos2 + 1;
 				valuePart = cmd.substring(pos);
-				value = valuePart.toFloat();
+        //Serial.println(valuePart);
+        if (setv)
+        {
+          valuei = valuePart.toInt();
 
-				// check range
-				if (value < 0.0f || value > 5.0f)
-				{
-					if (reply) Serial.println("Channel value must be between 0.0 and 5.0");
-					break;
-				}
+          // check range
+          if (valuei < 0 || valuei > 65535U)
+          {
+            if (reply) Serial.println(F("Channel value must be between 0 and 65535"));
+            break;
+          }
+        } else {
+				  value = valuePart.toFloat();
+          
+          // check range
+          if (value < 0.0f || value > 5.0f)
+          {
+            if (reply) Serial.println(F("Channel value must be between 0.0 and 5.0"));
+            break;
+          }
+        }
 
 				ok = true;
 				break;
@@ -649,7 +677,12 @@ void loop()
 					Serial.print(" of ");
 					Serial.print(bl ? "VCDAC" : "PZDAC");
 					Serial.print(" to ");
-					Serial.println(value);
+					if (setv)
+					{
+					  Serial.println(valuei);
+					} else {
+            Serial.println(value, 4);
+					}
 				}
 
 				//long rand = random(0, dacMax);
@@ -660,10 +693,20 @@ void loop()
 				// which dac?
 				if (bl)
 				{
-					vc_dac->SetVoltage(channel, value, 5.0f);
+          if (setv)
+          {
+            vc_dac->SetOutput(channel, valuei);
+          } else {
+					  vc_dac->SetVoltage(channel, value, 5.0f);
+          }
 				} else 
 				{
-					pz_dac->SetVoltage(channel, value, 5.0f);
+					if (setv)
+          {
+            pz_dac->SetOutput(channel, valuei);
+          } else {
+            pz_dac->SetVoltage(channel, value, 5.0f);
+          }
 				}
 				//dac->SetOutput(1U << (channel - 1), 
 
