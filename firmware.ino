@@ -378,6 +378,7 @@ void loop()
 
   else if (cmd == F("SIG::FES?"))
   {
+    sampler->readChannels();
     int a = sampler->getA();
     int b = sampler->getB();
     int c = sampler->getC();
