@@ -37,7 +37,19 @@ SignalSampler::SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff
 
 SignalSampler::~SignalSampler() {}
 
+// read all channels
 int SignalSampler::readChannels()
+{
+  return readChannels(255);
+}
+
+/*
+ * Read channels.
+ * channels is a bitmask to say what channels to sample.
+ * e.g. channels = READ_CHANNELS_ABDIFF | READ_CHANNELS_C
+ * would only sample ABDIFF and C channels
+ */
+int SignalSampler::readChannels(READ_CHANNELS channels)
 {
 
 	// for the moment, use single sample as somewhere sampleSize is being set to 0...
@@ -64,13 +76,13 @@ int SignalSampler::readChannels()
 	//for (int i = 0; i < this->sampleSize; i++){
 
 		// get signals
-		sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
-		sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
-		sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
-		sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
-		sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
-		sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
-		sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
+		if (channels & READ_CHANNELS_ABDIFF) sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
+		if (channels & READ_CHANNELS_CDDIFF) sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
+		//if (channels & READ_CHANNELS_A) sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
+		if (channels & READ_CHANNELS_A) sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
+		if (channels & READ_CHANNELS_B) sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
+		if (channels & READ_CHANNELS_C) sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
+		if (channels & READ_CHANNELS_D) sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
 
 
 //#ifdef DEBUG

@@ -378,7 +378,7 @@ void loop()
 
   else if (cmd == F("SIG::FES?"))
   {
-    sampler->readChannels();
+    sampler->readChannels(READ_CHANNELS_A | READ_CHANNELS_B | READ_CHANNELS_C | READ_CHANNELS_D);
     int a = sampler->getA();
     int b = sampler->getB();
     int c = sampler->getC();
@@ -390,6 +390,19 @@ void loop()
     }
     Serial.println(fes);
   }
+  else if (cmd == F("SIG::FESH?"))
+  {
+    sampler->readChannels(READ_CHANNELS_ABDIFF | READ_CHANNELS_CDDIFF);
+    int aMinusB = sampler->getAMinusB();
+    int cMinusD = sampler->getCMinusD();
+    int fes = aMinusB + cMinusD;//(a+c) - (b+d);
+    if (reply)
+    {
+      Serial.print(F("FESH="));
+    }
+    Serial.println(fes);
+  }
+  
 	// read single channel from diff
 	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, F("DIFFADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
