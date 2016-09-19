@@ -121,12 +121,12 @@ void loop()
 	bool bl;
 	uint16_t uint16;
 
-	 /*
-	  * Get command over serial
-	  * VCDAC::SET <x> <y>
-	  *   Set the channel <x> voltage of the piezo DAC to <y>
-	  */
-    
+	/*
+	 * Get command over serial
+	 * VCDAC::SET <x> <y>
+	 *   Set the channel <x> voltage of the piezo DAC to <y>
+	 */
+
 	if (cmd == F("GO"))
 	{
 		scanner->start();
@@ -141,7 +141,7 @@ void loop()
 		ctrl->setLineSize(CUSTOM_LINE_LENGTH);
 		ctrl->setStepSize(CUSTOM_STEPSIZE);
 		sampler->setSampleSize(CUSTOM_SAMPLE_SIZE);
-	  
+
 
 		if (reply)
 		{
@@ -151,7 +151,7 @@ void loop()
 			Serial.print(CUSTOM_LINE_LENGTH);
 			Serial.print(" CUSTOM_SAMPLE_SIZE= ");
 			Serial.println(CUSTOM_SAMPLE_SIZE);
-             Serial.write(';');
+			Serial.write(';');
 		}
 
 	}
@@ -163,7 +163,7 @@ void loop()
 	else if (cmd == F("STARTXPLUS?"))   // startXPlus (X starting point of scan)
 	{
 		Serial.println(ctrl->startingXPlus);
-           Serial.write(';');
+		Serial.write(';');
 	}
 	else if (CheckSingleParameter(cmd, F("STARTXPLUS"), idx, bl, F("STARTXPLUS error")))
 	{
@@ -171,7 +171,7 @@ void loop()
 		{
 			Serial.print("Setting startingXPlus to ");
 			Serial.println(idx);
-             Serial.write(';');
+			Serial.write(';');
 		}
 	}
 
@@ -185,7 +185,7 @@ void loop()
 		{
 			Serial.print(F("MOVEX="));
 			Serial.println(idx);
-             Serial.write(';');
+			Serial.write(';');
 		}
 		ctrl->move(X, idx, true);
 	}
@@ -195,7 +195,7 @@ void loop()
 		{
 			Serial.print(F("MOVEY="));
 			Serial.println(idx);
-             Serial.write(';');
+			Serial.write(';');
 		}
 		ctrl->move(Y, idx, true);
 	}
@@ -205,7 +205,7 @@ void loop()
 		{
 			Serial.print(F("MOVEZ="));
 			Serial.println(idx);
-             Serial.write(';');
+			Serial.write(';');
 		}
 		ctrl->move(Z, idx, true);
 	}
@@ -213,13 +213,13 @@ void loop()
 	////////////////
 	//// LINE LENGTH
 	////////////////
-  
+
 	else if (cmd == F("LINELENGTH?"))
-	{ 
-	  Serial.print(F("LINELENGTH:"));
+	{
+		Serial.print(F("LINELENGTH:"));
 		Serial.println(ctrl->getLineSize());
-           Serial.write(';');
-    
+		Serial.write(';');
+
 	}
 	else if (CheckSingleParameter(cmd, F("LINELENGTH"), idx, bl, F("LINELENGTH y - where y is integer to set.")))
 	{
@@ -227,7 +227,7 @@ void loop()
 		{
 			Serial.print(F("LINELENGTH SET="));
 			Serial.println(idx);
-             Serial.write(';');
+			Serial.write(';');
 		}
 		ctrl->setLineSize(idx);
 	}
@@ -239,7 +239,7 @@ void loop()
 	{
 		Serial.print(F("STEPSIZE:"));
 		Serial.println(ctrl->getStepSize());
-           Serial.write(';');
+		Serial.write(';');
 	}
 	else if (CheckSingleParameter(cmd, F("STEPSIZE"), idx, bl, F("STEPSIZE - Invalid command syntax!")))
 	{
@@ -315,14 +315,14 @@ void loop()
 	{
 		Serial.println(F("PONG"));
 	}
-  else if (cmd == F("REPLY?"))
-  {
-    if (reply)
-    {
-      Serial.print(F("REPLY="));
-    }
-    Serial.println(reply ? F("1") : F("0"));
-  }
+	else if (cmd == F("REPLY?"))
+	{
+		if (reply)
+		{
+			Serial.print(F("REPLY="));
+		}
+		Serial.println(reply ? F("1") : F("0"));
+	}
 	else if (CheckSingleParameter(cmd, F("REPLY"), idx, bl, F("REPLY x; where x = 0 or 1.")))   // reply?
 	{
 		reply = idx == 1;
@@ -332,14 +332,14 @@ void loop()
 			Serial.println(reply ? 1 : 0);
 		}
 	}
-  else if (cmd == F("ECHO?"))
-  {
-    if (reply)
-    {
-      Serial.print(F("ECHO="));
-    }
-    Serial.println(phone->echo);
-  }
+	else if (cmd == F("ECHO?"))
+	{
+		if (reply)
+		{
+			Serial.print(F("ECHO="));
+		}
+		Serial.println(phone->echo);
+	}
 	else if (CheckSingleParameter(cmd, F("ECHO"), idx, bl, F("ECHO x; where x = 0 or 1.")))  // echo back?
 	{
 		phone->echo = idx == 1;
@@ -376,37 +376,37 @@ void loop()
 		Serial.println(sampler->getD());
 	}
 
-  else if (cmd == F("SIG::FES?"))
-  {
-    sampler->readChannels(READ_CHANNELS_A | READ_CHANNELS_B | READ_CHANNELS_C | READ_CHANNELS_D);
-    int a = sampler->getA();
-    int b = sampler->getB();
-    int c = sampler->getC();
-    int d = sampler->getD();
-    int fes = (a+c) - (b+d);
-    if (reply)
-    {
-      Serial.print(F("FES="));
-    }
-    Serial.println(fes);
-  }
-  else if (cmd == F("SIG::FESH?"))
-  {
-    sampler->readChannels(READ_CHANNELS_ABDIFF | READ_CHANNELS_CDDIFF);
-    int aMinusB = sampler->getAMinusB();
-    int cMinusD = sampler->getCMinusD();
-    int fes = aMinusB + cMinusD;//(a+c) - (b+d);
-    if (reply)
-    {
-      Serial.print(F("FESH="));
-    }
-    Serial.println(fes);
-  }
-  
+	else if (cmd == F("SIG::FES?"))
+	{
+		sampler->readChannels(READ_CHANNELS_A | READ_CHANNELS_B | READ_CHANNELS_C | READ_CHANNELS_D);
+		int a = sampler->getA();
+		int b = sampler->getB();
+		int c = sampler->getC();
+		int d = sampler->getD();
+		int fes = (a + c) - (b + d);
+		if (reply)
+		{
+			Serial.print(F("FES="));
+		}
+		Serial.println(fes);
+	}
+	else if (cmd == F("SIG::FESH?"))
+	{
+		sampler->readChannels(READ_CHANNELS_ABDIFF | READ_CHANNELS_CDDIFF);
+		int aMinusB = sampler->getAMinusB();
+		int cMinusD = sampler->getCMinusD();
+		int fes = aMinusB + cMinusD;//(a+c) - (b+d);
+		if (reply)
+		{
+			Serial.print(F("FESH="));
+		}
+		Serial.println(fes);
+	}
+
 	// read single channel from diff
 	else if (CheckSingleParameter(cmd, F("DIFFADC::GET"), idx, bl, F("DIFFADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
-		if (idx >=0 && idx <= 3)
+		if (idx >= 0 && idx <= 3)
 		{
 			uint16 = diff_adc->readADC_SingleEnded(idx);
 			if (reply)
@@ -426,7 +426,7 @@ void loop()
 	// read single channel from sig
 	else if (CheckSingleParameter(cmd, F("SIGADC::GET"), idx, bl, F("SIGADC::GET x; where x is 0, 1, 2 or 3.")))
 	{
-		if (idx >=0 && idx <= 3)
+		if (idx >= 0 && idx <= 3)
 		{
 			uint16 = sig_adc->readADC_SingleEnded(idx);
 			if (reply)
@@ -608,15 +608,15 @@ void loop()
 		}
 		vc_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
 	}
-  else if (CheckSingleParameter(cmd, F("PZDAC::RFST"), idx, bl, F("PZDAC::RFST x; where x is 0 or 1")))  // set the internal reference state
-  {
-    if (reply)
-    {
-      Serial.print("IntRef=");
-      Serial.println(idx);
-    }
-    pz_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
-  }
+	else if (CheckSingleParameter(cmd, F("PZDAC::RFST"), idx, bl, F("PZDAC::RFST x; where x is 0 or 1")))  // set the internal reference state
+	{
+		if (reply)
+		{
+			Serial.print("IntRef=");
+			Serial.println(idx);
+		}
+		pz_dac->InternalVoltageReference(idx == 0 ? AD569X_INT_REF_OFF : AD569X_INT_REF_ON);
+	}
 	else
 	{
 		//////////////////////////////////////////////////////
@@ -631,9 +631,9 @@ void loop()
 			String valuePart;
 			int channel;
 			float value;
-      uint16_t valuei;
+			uint16_t valuei;
 			bl = cmd[0] == 'V';  // if cmd[0] is V, it must be VCDAC...
-      bool setv = cmd.indexOf("DAC::SETV") >= 0;  // set using the actual DAC value?
+			bool setv = cmd.indexOf("DAC::SETV") >= 0;  // set using the actual DAC value?
 			while (1)
 			{
 				String *parts;
@@ -656,27 +656,28 @@ void loop()
 				// extract value
 				pos = pos2 + 1;
 				valuePart = cmd.substring(pos);
-        //Serial.println(valuePart);
-        if (setv)
-        {
-          valuei = valuePart.toInt();
+				//Serial.println(valuePart);
+				if (setv)
+				{
+					valuei = valuePart.toInt();
 
-          // check range
-          if (valuei < 0 || valuei > 65535U)
-          {
-            if (reply) Serial.println(F("Channel value must be between 0 and 65535"));
-            break;
-          }
-        } else {
-				  value = valuePart.toFloat();
-          
-          // check range
-          if (value < 0.0f || value > 5.0f)
-          {
-            if (reply) Serial.println(F("Channel value must be between 0.0 and 5.0"));
-            break;
-          }
-        }
+					// check range
+					if (valuei < 0 || valuei > 65535U)
+					{
+						if (reply) Serial.println(F("Channel value must be between 0 and 65535"));
+						break;
+					}
+				}
+				else {
+					value = valuePart.toFloat();
+
+					// check range
+					if (value < 0.0f || value > 5.0f)
+					{
+						if (reply) Serial.println(F("Channel value must be between 0.0 and 5.0"));
+						break;
+					}
+				}
 
 				ok = true;
 				break;
@@ -693,9 +694,10 @@ void loop()
 					Serial.print(" to ");
 					if (setv)
 					{
-					  Serial.println(valuei);
-					} else {
-            Serial.println(value, 4);
+						Serial.println(valuei);
+					}
+					else {
+						Serial.println(value, 4);
 					}
 				}
 
@@ -707,20 +709,23 @@ void loop()
 				// which dac?
 				if (bl)
 				{
-          if (setv)
-          {
-            vc_dac->SetOutput(channel, valuei);
-          } else {
-					  vc_dac->SetVoltage(channel, value, 5.0f);
-          }
-				} else 
+					if (setv)
+					{
+						vc_dac->SetOutput(channel, valuei);
+					}
+					else {
+						vc_dac->SetVoltage(channel, value, 5.0f);
+					}
+				}
+				else
 				{
 					if (setv)
-          {
-            pz_dac->SetOutput(channel, valuei);
-          } else {
-            pz_dac->SetVoltage(channel, value, 5.0f);
-          }
+					{
+						pz_dac->SetOutput(channel, valuei);
+					}
+					else {
+						pz_dac->SetVoltage(channel, value, 5.0f);
+					}
 				}
 				//dac->SetOutput(1U << (channel - 1), 
 
