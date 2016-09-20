@@ -87,7 +87,7 @@ public:
 		move the stage in the direction given.  Move \a times amount of steps.
 		allAtOnce says whether to move step by step, \a times times, or just do all steps in one go (large voltage change)
 	*/
-	int move(PIEZO_AXIS direction,  int times, bool allAtOnce);
+	int move(PIEZO_AXIS direction, int32_t times, bool allAtOnce);
 
 
 	/*!

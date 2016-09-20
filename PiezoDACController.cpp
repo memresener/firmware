@@ -20,6 +20,7 @@ PiezoDACController::PiezoDACController(ADDAC *dac, int stepSize, int lineLength,
 	this->currentY = 0;
 	this->currentZ = 0;
 
+	// starting positions to give 0
 	uint16_t half = 44308;
 	startingXPlus = half;
 	startingYPlus = half;
@@ -42,21 +43,30 @@ PiezoDACController::PiezoDACController(ADDAC *dac, int stepSize, int lineLength,
 // destructor.
 PiezoDACController::~PiezoDACController() {}
 
-void PiezoDACController::Init(){
-  SetDACOutput(B1111, (uint16_t)44308);
+void PiezoDACController::Init() {
+	uint16_t half = 44308;
+	SetDACOutput(B1111, half);
+	currentXPlus = half;
+	currentYPlus = half;
+	currentXMinus = half;
+	currentYMinus = half;
 }
 
 void PiezoDACController::Init(uint16_t xoffset, uint16_t yoffset)
 {
-  startingXPlus = xoffset;
-  startingYPlus = xoffset;
-  startingXMinus = yoffset;
-  startingYMinus = yoffset;
-  
+	startingXPlus = xoffset;
+	startingYPlus = xoffset;
+	startingXMinus = yoffset;
+	startingYMinus = yoffset;
+
 	// should start with DACs at given range
 	SetDACOutput(B0101, (uint16_t)xoffset);
-  SetDACOutput(B1010, (uint16_t)yoffset);
-  SetAsOrigin();
+	SetDACOutput(B1010, (uint16_t)yoffset);
+	currentXPlus = xoffset;
+	currentYPlus = yoffset;
+	currentXMinus = xoffset;
+	currentYMinus = yoffset;
+	SetAsOrigin();
 }
 
 // reset parameters
@@ -90,10 +100,10 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
 {
 	int ret = 0;
-	Serial.print("Setting output of channel:");
-	Serial.print(channels);
-	Serial.print("to");
-	Serial.println(value);
+	//Serial.print("Setting output of channel:");
+	//Serial.print(channels);
+	//Serial.print("to");
+	//Serial.println(value);
 
 	// constrain
 	uint16_t max = dac->getMaxValueU();
@@ -137,7 +147,7 @@ int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
  * if the point is moved inside the square (currentXPlus are changed), then the DAC output is changed (and so currentActualXPlus etc. are changed)
  * if the point is moved outside the square (currentXPlus are changed), then the DAC output is NOT changed (currentActualXPlus are not changed)
 */
-int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
+int PiezoDACController::move(PIEZO_AXIS direction, int32_t steps, bool allAtOnce)
 {
 	//int diff = allAtOnce ? steps : (steps > 0 ? 1 : -1); // if all at once, change voltage by full amount in 
 	//one go.  Otherwise one at a time.
@@ -157,10 +167,10 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 	// Decide what to move where
   
-	int newXPlus;
-	int newXMinus;
-	int newYPlus;
-	int newYMinus;
+	int32_t newXPlus;
+	int32_t newXMinus;
+	int32_t newYPlus;
+	int32_t newYMinus;
 	switch (direction)
 	{
 		// for Z up/down, increment/decrement all dac channels
@@ -220,8 +230,8 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 
 	// change DAC
-	int newPlus;
-	int newMinus;
+	int32_t newPlus;
+	int32_t newMinus;
 	if (doSingle)
 	{
 		for (int i = 0; i < lim; i++)
@@ -249,6 +259,8 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 			}
 		}
 	}
+
+
 	return 0;
 }
 
@@ -256,11 +268,11 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 int PiezoDACController::GotoCoordinates(int32_t x, int32_t y, int32_t z)
 {
 	// difference?
-	int diffX = x;
+	int32_t diffX = x;
 	diffX -= currentX;
-	int diffY = y;
+	int32_t diffY = y;
 	diffY -= currentY;
-	int diffZ = z;
+	int32_t diffZ = z;
 	diffZ -= currentZ;
 
 	diffX *= stepSize;
