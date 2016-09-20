@@ -83,44 +83,39 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 /*
  * Set the DAC output and update the internal position.
  * the DAC output is only changed if the value is in range, however the internal position is ALWAYS updated
- * return 0 if ok, 1 if not set
+ * return 0 if ok, 1 if set but constrained
 */
 int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
 {
+	int ret = 0;
+	Serial.print("Setting output of channel:");
+	Serial.print(channels);
+	Serial.print("to");
+	Serial.println(value);
 
-  /*Serial.print("Setting output of channel:");
-  Serial.print(channels);
-  Serial.print("to");
-  Serial.println(value);*/
- 
-  
 	// constrain
 	uint16_t max = dac->getMaxValueU();
-	if (value > max) value = max;
-	if (value < 0) value = 0;
+	if (value > max)
+	{
+		value = max;
+		ret = 1;
+	}
+	else if (value < 0)
+	{
+		value = 0;
+		ret = 1;
+	}
 
 	// send to DAC
 	dac->SetOutput(channels, value);
 
 	// update internal ACTUAL values
-	if (channels & X_PLUS)
-	{
-		currentActualXPlus = value;
-	}
-	if (channels & X_MINUS)
-	{
-		currentActualXMinus = value;
-	}
-	if (channels & Y_PLUS)
-	{
-		currentActualYPlus = value;
-	}
-	if (channels & Y_MINUS)
-	{
-		currentActualYMinus = value;
-	}
+	if (channels & X_PLUS) currentActualXPlus = value;
+	if (channels & X_MINUS) currentActualXMinus = value;
+	if (channels & Y_PLUS) currentActualYPlus = value;
+	if (channels & Y_MINUS) currentActualYMinus = value;
 
-	return 0;
+	return ret;
 }
 
 
