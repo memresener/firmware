@@ -82,7 +82,9 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 
 /*
  * Set the DAC output and update the internal position.
- * the DAC output is only changed if the value is in range, however the internal position is ALWAYS updated
+ * the DAC output is only changed if the value is in range, however the internal position is ALWAYS updated.
+ * ACTUAL DAC values (e.g. currentActualYPlus) are only updated if the DAC value is changed.
+
  * return 0 if ok, 1 if set but constrained
 */
 int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
@@ -118,7 +120,23 @@ int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
 	return ret;
 }
 
-
+/*
+ * Change the DAC to move the stage in a given direction by a given number of DAC steps.
+ * Performs range checking.  If the stage tries to move so that one channel would go beyond or above 0 or the maximum dac value respectively,
+ * nothing happens.
+ * However the currentXMinus etc. values are always changed by the number of steps.
+ * Example:
+ *   if currentXPlus is 10, and we try to move currentXPlus down by 20 (and curentXMinus up by 20)
+ *   then because the new value of currentXPlus would be -10, which is below the dac limit of 0, the dac channels for X plus and X minus
+ *   are not changed: currentActualXPlus stays equal to 10, and currentActualXMinus is also unchanged.
+ *   HOWEVER currentXPlus is changed to -10 (and currentXMinus is changed as well)
+ *
+ * an easy way to visualise this is that the range of allowed movement is square in the x-y plane.
+ * the desired position is a point in the plane.  The DAC output values are represented by (currentActualXPlus etc.).
+ * the desired point is represented by (currentXPlus etc.)
+ * if the point is moved inside the square (currentXPlus are changed), then the DAC output is changed (and so currentActualXPlus etc. are changed)
+ * if the point is moved outside the square (currentXPlus are changed), then the DAC output is NOT changed (currentActualXPlus are not changed)
+*/
 int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 {
 	//int diff = allAtOnce ? steps : (steps > 0 ? 1 : -1); // if all at once, change voltage by full amount in 
