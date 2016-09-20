@@ -39,69 +39,24 @@ SignalSampler::~SignalSampler() {}
 
 int SignalSampler::readChannels()
 {
+  return readChannels(255);
+}
+int SignalSampler::readChannels(READ_CHANNELS channels)
+{
 
-	// for the moment, use single sample as somewhere sampleSize is being set to 0...
-	//sampleSize = 1;
 
-	//int aSignalValue = 0;
-	//int bSignalValue = 0;
-	//int *sumSignalValue;
-	//int j, temp;
-	//int median = 0;
-	//sumSignalValue = (int*)malloc(sizeof(int)*sampleSize);
-
-	// reset sampleMeans, order is:
-	// 0 - A minus B
-	// 1 - C minus D
-	// 2 - Sum
-	// 3 - A
-	// 4 - B
-	// 5 - C
-	// 6 - D
-	//memset(sampleMeans, 0, sizeof(float) * 7);  // -- causes issues
 	resetMeans();
  
-	//for (int i = 0; i < this->sampleSize; i++){
 
-		// get signals
-		sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
-		sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
-		//sampleMeans[2] += diff_adc->readADC_SingleEnded(SUM_CHANNEL);
-		//sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
-		//sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
-		//sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
-		//sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
+    if (channels & READ_CHANNELS_ABDIFF) sampleMeans[0] += diff_adc->readADC_SingleEnded(ABDIFF_CHANNEL);
+    if (channels & READ_CHANNELS_CDDIFF) sampleMeans[1] += diff_adc->readADC_SingleEnded(CDDIFF_CHANNEL);
 
+    if (channels & READ_CHANNELS_A) sampleMeans[3] += sig_adc->readADC_SingleEnded(A_CHANNEL);
+    if (channels & READ_CHANNELS_B) sampleMeans[4] += sig_adc->readADC_SingleEnded(B_CHANNEL);
+    if (channels & READ_CHANNELS_C) sampleMeans[5] += sig_adc->readADC_SingleEnded(C_CHANNEL);
+    if (channels & READ_CHANNELS_D) sampleMeans[6] += sig_adc->readADC_SingleEnded(D_CHANNEL);
 
-//#ifdef DEBUG
-//		Serial.println(sampleMeans[0]);
-//		Serial.println(sampleMeans[1]);
-//		Serial.println(sampleMeans[2]);
-//		Serial.println(sampleMeans[3]);
-//		Serial.println(sampleMeans[4]);
-//		Serial.println(sampleMeans[5]);
-//		Serial.println(sampleMeans[6]);
-//#endif
-
-		//temp = aSignalValue+bSignalValue;
-		//// insert sorting the sum array
-		//j = i-1;
-		//while(j >= 0 && temp < sumSignalValue[j]){
-		//	sumSignalValue[j+1] = sumSignalValue[j]; 
-		//	j--;
-		//}
-		//sumSignalValue[j+1] = temp;
-	//}
-
-
-	//// calculate means
-	//for (int i = 0; i < 7; i++)
-	//{
-	//	sampleMeans[i] = sampleMeans[i] / sampleSize;
-	//}
-
-	//median = sumSignalValue[sampleSize/2];
-	return 0;
+	return (sampleMeans[0]+sampleMeans[1]);
 }
 
 int SignalSampler::detectRandom()

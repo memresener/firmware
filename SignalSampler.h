@@ -20,6 +20,14 @@
 #define C_CHANNEL 2
 #define D_CHANNEL 3
 
+typedef byte READ_CHANNELS;
+const READ_CHANNELS READ_CHANNELS_A = 1;
+const READ_CHANNELS READ_CHANNELS_B = 2;
+const READ_CHANNELS READ_CHANNELS_C = 4;
+const READ_CHANNELS READ_CHANNELS_D = 8;
+const READ_CHANNELS READ_CHANNELS_ABDIFF = 16;
+const READ_CHANNELS READ_CHANNELS_CDDIFF = 32;
+
 class SignalSampler
 {
 	private: 
@@ -43,6 +51,8 @@ class SignalSampler
 		SignalSampler(void);
 		SignalSampler(Adafruit_ADS1015 *&sig_adc, Adafruit_ADS1015 *&diff_adc, int);
 		~SignalSampler();
+   
+    int readChannels(READ_CHANNELS channels);
 		int readChannels();
 		int detectRandom();
 		int reset();

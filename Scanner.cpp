@@ -50,10 +50,10 @@ int Scanner::scanLine(unsigned int lineSize) {
   
 	for (int i = 0; i < idx_MAX; i++) {
 
-		sampler->readChannels();
+		sampler->readChannels(48);
 
 		// calculate and save FES
-		pixels[0] = sampler->getAMinusB() - sampler->getCMinusD();
+		pixels[0] = sampler->getAMinusB() + sampler->getCMinusD();
 		Serial.print(pixels[0]);
     Serial.write(',');
 
@@ -68,10 +68,10 @@ int Scanner::scanLine(unsigned int lineSize) {
 	//retrace
 	for (int i = 0; i < idx_MAX; i++) {
 
-		sampler->readChannels();
+		sampler->readChannels(48);
 
 		// calculate and save FES
-		pixels[x] = sampler->getAMinusB() - sampler->getCMinusD();
+		pixels[x] = sampler->getAMinusB() + sampler->getCMinusD();
 		Serial.print(pixels[0]);
 
 		if (i + 1 < idx_MAX)
