@@ -107,6 +107,9 @@ void setup() {
 
 	// initialise controller
 	ctrl->Init();
+
+	Serial.print(F("sizeof(int)="));
+	Serial.println(sizeof(int));
 }
 
 extern String const PARAM_LINE_LENGTH;

@@ -31,6 +31,11 @@ PiezoDACController::PiezoDACController(ADDAC *dac, int stepSize, int lineLength,
 	currentXMinus = 0;
 	currentYMinus = 0;
 
+	currentActualXPlus = 0;
+	currentActualYPlus = 0;
+	currentActualXMinus = 0;
+	currentActualYMinus = 0;
+
 	invertChannels = false;
 }
 
@@ -75,35 +80,44 @@ unsigned int PiezoDACController::reset(int stepSize, int lineSize, int ldacPin) 
 
 //#undef DEBUG
 
-/*! Set the DAC output and update internal position. */
-int PiezoDACController::SetDACOutput(uint8_t channels, uint16_t value)
+/*
+ * Set the DAC output and update the internal position.
+ * the DAC output is only changed if the value is in range, however the internal position is ALWAYS updated
+ * return 0 if ok, 1 if not set
+*/
+int PiezoDACController::SetDACOutput(uint8_t channels, int32_t value)
 {
 
   /*Serial.print("Setting output of channel:");
   Serial.print(channels);
   Serial.print("to");
   Serial.println(value);*/
+ 
   
+	// constrain
+	uint16_t max = dac->getMaxValueU();
+	if (value > max) value = max;
+	if (value < 0) value = 0;
+
+	// send to DAC
 	dac->SetOutput(channels, value);
-  
+
+	// update internal ACTUAL values
 	if (channels & X_PLUS)
 	{
-		currentXPlus = value;
+		currentActualXPlus = value;
 	}
- 
 	if (channels & X_MINUS)
 	{
-		currentXMinus = value;
+		currentActualXMinus = value;
 	}
-
 	if (channels & Y_PLUS)
 	{
-		currentYPlus = value;
+		currentActualYPlus = value;
 	}
- 
 	if (channels & Y_MINUS)
 	{
-		currentYMinus = value;
+		currentActualYMinus = value;
 	}
 
 	return 0;
@@ -120,32 +134,58 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 	uint8_t channelPlus = 0;
 	uint8_t channelMinus = 0;
-	uint16_t currentPlus = 0;
-	uint16_t currentMinus = 0;
+	int32_t currentPlus = 0;
+	int32_t currentMinus = 0;
 	bool doSingle = true;
+	uint16_t dacMaxValue = dac->getMaxValueU();
+	//Serial.print("dmv=");
+	//Serial.println(dacMaxValue);
+	//Serial.println(dac->getMaxValueU());
 
 	// Decide what to move where
   
+	int newXPlus;
+	int newXMinus;
+	int newYPlus;
+	int newYMinus;
 	switch (direction)
 	{
 		// for Z up/down, increment/decrement all dac channels
 	case Z:
+		// calculate prospective new positions
+		newXPlus = currentXPlus + diff;
+		newXMinus = currentXMinus + diff;
+		newYPlus = currentYPlus + diff;
+		newYMinus = currentYMinus + diff;
 
-		//diff = direction == Z_UP ? adiff : -adiff;  // increase or decrease?
-
-		for (int i = 0; i < lim; i++)
+		// check we wouldn't go outside the range on anything
+		if (inRange(0, dacMaxValue, newXPlus) &&
+			inRange(0, dacMaxValue, newXMinus) &&
+			inRange(0, dacMaxValue, newYPlus) &&
+			inRange(0, dacMaxValue, newYMinus))
 		{
-			SetDACOutput(X_PLUS, currentXPlus + diff);
-			SetDACOutput(X_MINUS, currentXMinus + diff);
-			SetDACOutput(Y_PLUS, currentYPlus + diff);
-			SetDACOutput(Y_MINUS, currentYMinus + diff);
+
+			for (int i = 0; i < lim; i++)
+			{
+				SetDACOutput(X_PLUS, newXPlus);
+				SetDACOutput(X_MINUS, newXMinus);
+				SetDACOutput(Y_PLUS, newYPlus);
+				SetDACOutput(Y_MINUS, newYMinus);
+			}
 		}
+
+		// update current
+		currentXPlus = newXPlus;
+		currentXMinus = newXMinus;
+		currentYPlus = newYPlus;
+		currentYMinus = newYMinus;
+
 		doSingle = false;
 		break;
 
 	case X:
-		///diff = direction == X_UP ? adiff : -adiff;  // increase or decrease?
-   
+
+		// concerning X...
 		currentPlus = currentXPlus;
 		currentMinus = currentXMinus;
 		channelPlus = X_PLUS;
@@ -154,8 +194,8 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 		break;
 
 	case Y:
-		//diff = direction == Y_UP ? adiff : -adiff;  // increase or decrease?
-    
+		
+		// concerning Y...
 		currentPlus = currentYPlus;
 		currentMinus = currentYMinus;
 		channelPlus = Y_PLUS;
@@ -167,19 +207,40 @@ int PiezoDACController::move(PIEZO_AXIS direction, int steps, bool allAtOnce)
 
 
 	// change DAC
+	int newPlus;
+	int newMinus;
 	if (doSingle)
 	{
 		for (int i = 0; i < lim; i++)
 		{
-			SetDACOutput(channelPlus, currentPlus + diff);
-			SetDACOutput(channelMinus, currentMinus - diff);
+			newPlus = currentPlus + diff;
+			newMinus = currentMinus - diff;
+
+			// check we wouldn't go outside range
+			if (inRange(0, dacMaxValue, newPlus) && inRange(0, dacMaxValue, newMinus))
+			{
+				SetDACOutput(channelPlus, newPlus);
+				SetDACOutput(channelMinus, newMinus);
+			}
+
+			// update current internal DAC value, EVEN if it wasn't set
+			if (direction == X)
+			{
+				currentXPlus = newPlus;
+				currentXMinus = newMinus;
+			}
+			else if (direction == Y)
+			{
+				currentYPlus = newPlus;
+				currentYMinus = newMinus;
+			}
 		}
 	}
 	return 0;
 }
 
 
-int PiezoDACController::GotoCoordinates(int x, int y, int z)
+int PiezoDACController::GotoCoordinates(int32_t x, int32_t y, int32_t z)
 {
 	// difference?
 	int diffX = x;

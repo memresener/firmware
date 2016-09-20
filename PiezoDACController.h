@@ -46,6 +46,7 @@ class PiezoDACController {
 private:
 	// the DAC class
 	ADDAC *dac;
+	uint32_t dacMaxValue = 0;
 
 	// Number of increments per pixel
 	int stepSize;
@@ -60,16 +61,21 @@ private:
 	//int setCoordinates();
 
 	// current position relative to origin (0,0)
-	int currentX;
-	int currentY;
-	int currentZ;
+	int32_t currentX;
+	int32_t currentY;
+	int32_t currentZ;
 
+	// the current internal DAC values (MAY NOT BE THE ACTUAL DAC VALUES IF WE WENT BEYOND THE LIMIT)
+	int32_t currentXPlus;
+	int32_t currentXMinus;
+	int32_t currentYPlus;
+	int32_t currentYMinus;
 
-	// the current DAC output values (values from 0 to 65535)
-	uint16_t currentXPlus;
-	uint16_t currentXMinus;
-	uint16_t currentYPlus;
-	uint16_t currentYMinus;
+	// the current ACTUAL internal DAC values (THESE ARE THE VALUES THAT WERE ACTUALL SENT TO THE DAC)
+	int32_t currentActualXPlus;
+	int32_t currentActualXMinus;
+	int32_t currentActualYPlus;
+	int32_t currentActualYMinus;
 
 
 	// scan 90-degree angle
@@ -86,8 +92,9 @@ public:
 
 	/*!
 		Set DAC output.  Includes scaling etc.
+		Value is an integer (i.e. allowing negative and > 65535) but the value sent to the dac will be clipped
 	*/
-	int SetDACOutput(uint8_t channels, uint16_t value);
+	int SetDACOutput(uint8_t channels, int32_t value);
 	//int SetDACOutput(uint8_t channels, double value, double vRef);
 
 	// the starting DAC output values (values from 0 to 65535)
@@ -99,7 +106,7 @@ public:
 	/*!
 	Go to some coordinates
 	*/
-	int GotoCoordinates(int x, int y, int z);
+	int GotoCoordinates(int32_t x, int32_t y, int32_t z);
 
 
 	// get position
