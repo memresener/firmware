@@ -63,6 +63,11 @@ public:
 	virtual int SetVoltage(unsigned char channel,
 		float outputVoltage,
 		float vRef) = 0;
+
+
+	virtual uint16_t getMaxValueU() = 0;
+	virtual float getMaxValueF() = 0;
+	virtual unsigned char getBits() = 0;
 };
 
 #endif

@@ -179,6 +179,10 @@ void loop()
 #ifdef CTRL_
 
 
+	////////////////
+	//// MOVEMENT THROUGH CONTROLLER (RAW MOVEMENT, DOESN'T CHANGE POSITION)
+	////////////////
+
 	else if (CheckSingleParameter(cmd, F("CTRL::MOVEX"), idx, bl, F("CTRL::MOVEX y y=int")))  // move steps in the X direction
 	{
 		if (reply)
@@ -208,6 +212,53 @@ void loop()
 			Serial.write(';');
 		}
 		ctrl->move(Z, idx, true);
+	}
+
+
+	else if (cmd == F("CTRL::INIT"))
+	{
+		ctrl->Init();
+	}
+	else if (cmd.indexOf(F("GOTO")) == 0)
+	{
+		int x = Serial.parseInt();
+		int y = Serial.parseInt();
+		int z = Serial.parseInt();
+
+		ctrl->GotoCoordinates(x, y, z);
+
+		if (reply)
+		{
+			Serial.print(F("Going to ("));
+			Serial.print(x);
+			Serial.print(",");
+			Serial.print(y);
+			Serial.print(",");
+			Serial.print(z);
+			Serial.println(")");
+		}
+	}
+
+	////////////////
+	//// CONTROLLER POSITION READOUT
+	////////////////
+
+
+	else if (CheckSingleParameter(cmd, "POS?", idx, bl, F("POS? x;  where x is 1, 2, or 3 (for x, y, or z)")))  // set the internal reference state
+	{
+		//Serial.println(idx);
+		if (idx >= 1 && idx <= 3 && bl)
+		{
+			if (reply)
+			{
+				Serial.print(F("POS"));
+				Serial.print(idx);
+				Serial.print(F("="));
+			}
+
+			int pos = ctrl->GetPosition((PIEZO_AXIS)(idx - 1));
+			Serial.println(pos);
+		}
 	}
 
 	////////////////
@@ -278,8 +329,6 @@ void loop()
 	}
 #endif
 
-#define SaS_
-#ifdef SaS_
 	//////////////
 	// SAMPLE SIZE
 	//////////////
@@ -303,7 +352,6 @@ void loop()
 			//Serial.println(gSAMPLESIZE);
 		}
 	}
-#endif
 
 	else if (cmd == F("ERROR"))
 	{
@@ -537,55 +585,8 @@ void loop()
 #define DACCOMMANDS
 #ifdef DACCOMMANDS
 
-	else if (cmd == F("CTRL::INIT"))
-	{
-		ctrl->Init();
-	}
-	else if (cmd.indexOf(F("GOTO")) == 0)
-	{
-		int x = Serial.parseInt();
-		int y = Serial.parseInt();
-		int z = Serial.parseInt();
 
-		ctrl->GotoCoordinates(x, y, z);
-
-		if (reply)
-		{
-			Serial.print(F("Goint to ("));
-			Serial.print(x);
-			Serial.print(",");
-			Serial.print(y);
-			Serial.print(",");
-			Serial.print(z);
-			Serial.println(")");
-		}
-	}
-	else if (CheckSingleParameter(cmd, "POS?", idx, bl, "POS?!"))  // set the internal reference state
-	{
-		Serial.println(idx);
-		if (idx >= 1 && idx <= 3 && bl)
-		{
-			if (reply)
-			{
-				Serial.print(idx);
-				Serial.print("=");
-			}
-
-			int pos = ctrl->GetPosition((PIEZO_AXIS)(idx - 1));
-			Serial.println(pos);
-
-			if (reply)
-			{
-				Serial.print(idx);
-				Serial.print("=");
-				Serial.println(pos);
-			}
-		}
-	}
-
-
-
-	else if (cmd == "DAC::PRINT")  /// print dac details
+	else if (cmd == "VCDAC::PRINT")  /// print dac details
 	{
 		Serial.print("Max value (u) = ");
 		Serial.println(vc_dac->getMaxValueU());
@@ -593,6 +594,15 @@ void loop()
 		Serial.println(vc_dac->getMaxValueF());
 		Serial.print("Bits = ");
 		Serial.println(vc_dac->getBits());
+	}
+	else if (cmd == "PZDAC::PRINT")  /// print dac details
+	{
+		Serial.print("Max value (u) = ");
+		Serial.println(pz_dac->getMaxValueU());
+		Serial.print("Max value (f) = ");
+		Serial.println(pz_dac->getMaxValueF());
+		Serial.print("Bits = ");
+		Serial.println(pz_dac->getBits());
 	}
 	else if (cmd == F("VCDAC::RST"))
 	{
