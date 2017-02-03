@@ -134,22 +134,25 @@ void setup()
   setReg(Addr, mConfig | pAdcSequence, val);
   Serial.println("Done.");
   */
-  /*
-  Wire.beginTransmission(Addr);
-  Wire.write(0b100);
-  Wire.write(0b00000000);
-  Wire.write(0b10000001);
-  Wire.endTransmission();
-  */
-  uint16_t val = pin7 | pin0;
-  setReg(Addr, mConfig | pAdcSequence, val); 
   
-
-  Wire.beginTransmission(Addr);
-  Wire.write(0b10);
-  Wire.write(0b10);
-  Wire.write(0b10000001);
-  Wire.endTransmission();
+  //Wire.beginTransmission(Addr);
+  //Wire.write(0b100);
+  //Wire.write(0b00000000);
+  //Wire.write(0b10000010);
+  //Wire.endTransmission();
+  
+  uint16_t val = pin7 | pin2;
+  setReg(Addr, mConfig | pAdcPinConfig, val); 
+  
+  
+  //Wire.beginTransmission(Addr);
+  //Wire.write(0b10);
+  //Wire.write(0b10);
+  //Wire.write(0b10000010);
+  //Wire.endTransmission();
+  
+  val = adcRep | pin7 | pin2;
+  setReg(Addr, mConfig | pAdcSequence, val); 
 }
 
 void loop()
