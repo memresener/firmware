@@ -78,7 +78,8 @@ void setReg(byte address, byte reg, uint16_t val)
   // Start I2C transmission
   Wire.beginTransmission(address);
   Wire.write(reg);
-  Wire.write(val);
+  Wire.write(val >> 8);  // msb
+  Wire.write(val & 255); // lsb
   Wire.endTransmission();
 }
 
@@ -133,12 +134,16 @@ void setup()
   setReg(Addr, mConfig | pAdcSequence, val);
   Serial.println("Done.");
   */
-
+  /*
   Wire.beginTransmission(Addr);
   Wire.write(0b100);
   Wire.write(0b00000000);
   Wire.write(0b10000001);
   Wire.endTransmission();
+  */
+  uint16_t val = pin7 | pin0;
+  setReg(Addr, mConfig | pAdcSequence, val); 
+  
 
   Wire.beginTransmission(Addr);
   Wire.write(0b10);
