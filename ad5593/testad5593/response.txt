@@ -1,0 +1,12 @@
+1111 11111111:
+
+data: 1111 11111111
+channel: 0
+adcbit: 0
+
+
+1110000 0:
+
+data: 0
+channel: 111 = 7
+adcbit: 0
