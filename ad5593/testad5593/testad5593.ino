@@ -102,54 +102,26 @@ int getReg(byte address, byte reg, int nBytes, byte* data)
   Wire.requestFrom(address, nBytes);  // Request 1 byte of data
   int count = 0;
   int c = 0;
-  while (Wire.available() == 1)  // Read 1 byte of data
+  while (Wire.available() > 0)  // Read 1 byte of data
   {
     byte tByte = Wire.read();
     data[count] = tByte;
     c += 1;
+    count += 1;
     if (count >= nBytes) break;
   }
+  return c;
 }
 
 void setup()
 {
+  uint16_t val;
   Wire.begin();
   Serial.begin(9600);
 
-  /*
-  // set up adc sequence
-  Serial.print("Setting Adc pin config...");
-  uint16_t val = pin2;
-  Serial.print(mConfig | pAdcPinConfig, BIN);
-  Serial.print(" ");
-  Serial.println(val, BIN);
-  setReg(Addr, mConfig | pAdcPinConfig, val);
-  Serial.println("Done.");
   
-  Serial.println("Setting Adc sequence...");
-  val = pin2;
-  Serial.print(mConfig | pAdcSequence, BIN);
-  Serial.print(" ");
-  Serial.println(val, BIN);
-  setReg(Addr, mConfig | pAdcSequence, val);
-  Serial.println("Done.");
-  */
-  
-  //Wire.beginTransmission(Addr);
-  //Wire.write(0b100);
-  //Wire.write(0b00000000);
-  //Wire.write(0b10000010);
-  //Wire.endTransmission();
-  
-  uint16_t val = pin7 | pin2;
+  val = pin7 | pin2;
   setReg(Addr, mConfig | pAdcPinConfig, val); 
-  
-  
-  //Wire.beginTransmission(Addr);
-  //Wire.write(0b10);
-  //Wire.write(0b10);
-  //Wire.write(0b10000010);
-  //Wire.endTransmission();
   
   val = adcRep | pin7 | pin2;
   setReg(Addr, mConfig | pAdcSequence, val); 
@@ -165,13 +137,23 @@ void loop()
   //getReg(Addr, mAdcRead, nBytes, data);
   //Serial.println("Done.");
 
+  /*
   Wire.beginTransmission(Addr);
   Wire.write(mAdcRead);
   Wire.endTransmission();
   Wire.requestFrom(Addr, 2);
+  Serial.println(Wire.available());
   byte msb = Wire.read();
+  Serial.println(Wire.available());
   byte lsb = Wire.read();
+  */
+  
+  int c = getReg(Addr, mAdcRead, 2, data);
+  byte msb = data[0];
+  byte lsb = data[1];
 
+  Serial.print(c);
+  Serial.print(" ");
   Serial.print(msb, BIN);
   Serial.print(" ");
   Serial.println(lsb, BIN);
