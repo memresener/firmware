@@ -85,11 +85,11 @@ void setReg(byte address, byte reg, uint16_t val)
 
 // format the data from the adcRead
 // returns true if it was from the adc
-bool formatAdcData(uint16_t data, byte* channel, uint16_t* value)
+bool formatAdcData(uint16_t data, int* channel, uint16_t* value)
 {
   bool fromAdc = (data & adcFromAdc) == 0;
-  channel = (data & adcChannel) >> 12;
-  value = (data & adcValue);
+  *channel = (data & adcChannel) >> 12;
+  *value = (data & adcValue);
 }
 
 // read from register
@@ -120,57 +120,26 @@ void setup()
   Serial.begin(9600);
 
   
-  val = pin7 | pin2;
+  val = pin0;
   setReg(Addr, mConfig | pAdcPinConfig, val); 
   
-  val = adcRep | pin7 | pin2;
+  val = adcRep | adcTemp | pin0;
   setReg(Addr, mConfig | pAdcSequence, val); 
 }
 
 void loop()
 {
-  int nBytes = 2;
-  
-  // read the ADC
+  int nBytes = 4;
   byte *data = new byte[nBytes];
-  //Serial.print("Reading Adc...");
-  //getReg(Addr, mAdcRead, nBytes, data);
-  //Serial.println("Done.");
-
-  /*
-  Wire.beginTransmission(Addr);
-  Wire.write(mAdcRead);
-  Wire.endTransmission();
-  Wire.requestFrom(Addr, 2);
-  Serial.println(Wire.available());
-  byte msb = Wire.read();
-  Serial.println(Wire.available());
-  byte lsb = Wire.read();
-  */
   
-  int c = getReg(Addr, mAdcRead, 2, data);
-  byte msb = data[0];
-  byte lsb = data[1];
+  int c = getReg(Addr, mAdcRead, nBytes, data);
 
-  Serial.print(c);
-  Serial.print(" ");
-  Serial.print(msb, BIN);
-  Serial.print(" ");
-  Serial.println(lsb, BIN);
-
-  /*
-  Serial.println("Data: ");
   for (int i=0; i<(nBytes/2); i++)
   {
-    uint16_t dpart = (data[i] << 8) + data[i+1];
-    Serial.print(B0);
-    Serial.print(data[i], BIN);
-    Serial.print(" ");
-    Serial.println(data[i+1], BIN);
-
-    byte channel = 0;
+    int channel = 0;
     uint16_t value = 0;
-    bool fromAdc = formatAdcData(dpart, &channel, &value);
+    bool fromAdc = formatAdcData((data[i] << 8) + data[i+1], &channel, &value);
+    
     Serial.print("Channel ");
     Serial.print(channel);
     Serial.print(": ");
@@ -179,8 +148,8 @@ void loop()
     Serial.print(fromAdc);
     Serial.println(")");
   }
-  Serial.println("");
-  */
 
-  delay(2000);
+  //Serial.println();
+
+  delay(200);
 }
